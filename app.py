@@ -13,14 +13,19 @@ def continuous_download():
                 ticked_id = file.read()            
         except FileNotFoundError:
             print(f"No file {settings.Id_File} found, starting with id 1")
-            ticked_id="1"
+            #ticked_id="1"
+            with open(settings.Id_File, "w") as file:
+                file.write('1')
+            with open(settings.Id_File, "r") as file:
+                ticked_id = file.read()   
 
         try:
             download_result = glpi_main(ticked_id)  # JSON return
             #print(download_result)
-            response = requests.post(settings.Ticket_Post_Link, json=download_result)
-            response.raise_for_status()
-            print("New ticket sent successfully.")
+            if(download_result!={}):
+                response = requests.post(settings.Ticket_Post_Link, json=download_result)
+                response.raise_for_status()
+                print("New ticket sent successfully.")
         except Exception as e:
             print("Ticket does not send")
             print(f"Error: {str(e)}")

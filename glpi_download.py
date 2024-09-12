@@ -53,8 +53,8 @@ def search_latest_ticket(session_token, last_tik):
             return None
     else:
         print(f"Error searching tickets : {response.status_code}")
-        print(response.text)
-        return None
+        #print(response.text)
+        return int(last_tik)-6
     
 def get_ticket_details(session_token, ticket_id):
     
@@ -139,10 +139,11 @@ def glpi_main(tik_aid):
     session_token = init_session()
     try:
         while True:
-            sleep(settings.Check_Time)
+            sleeper = settings.Check_Time
             # New tickets
             if session_token:
                 latest_ticket_id = search_latest_ticket(session_token, str(int(tik_aid) + 5))
+                                                        
                 if int(tik_aid) < latest_ticket_id:
                     with open(settings.Id_File, "w") as file:
                         file.write(str(latest_ticket_id))
@@ -168,6 +169,13 @@ def glpi_main(tik_aid):
                             print("Can't download ticket details.")
                     else:
                         print("Can't find newest ticket")
+                elif(latest_ticket_id < int(tik_aid)):
+                    tik_nas=int(tik_aid)+1
+                    with open(settings.Id_File, "w") as file:
+                        file.write(str(tik_nas))
+                    print("Searching for other tickets...")
+                    sleeper = 2
+                    break
             else:
                 print("Session init error.")
                 break
@@ -194,6 +202,7 @@ def glpi_main(tik_aid):
                         users_id_lastupdater = ticket_details.get('users_id_lastupdater')
                         send_ticket_closure_info(ticket_number, users_id_lastupdater)
                         remove_ticket(ticket_number, 4)    
+            sleep(sleeper)
 
     except Exception as e:
         print(f"Main GLPI ERROR: {e}")
