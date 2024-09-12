@@ -1,4 +1,4 @@
-# GLPI-API-Conect
+# GLPI-API-Connect
 Created to connect GLPI to MS Dynamics (Power Automate) using GLPI API.
 
 1. Finds new tickets, extracts selected information from ticket and user details, then posts it to the given address.
