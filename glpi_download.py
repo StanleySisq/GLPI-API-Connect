@@ -125,8 +125,8 @@ def is_ticket_open(session_token, ticket_id):
 
 def send_ticket_closure_info(ticket_id, user_id):
     payload = {
-        "ticket_id": ticket_id,
-        "user_id": user_id
+        "ticket_id": str(ticket_id),
+        "user_id": str(user_id)
     }
     headers = {'Content-Type': 'application/json'}
     
