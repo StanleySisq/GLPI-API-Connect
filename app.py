@@ -1,12 +1,30 @@
 from flask import Flask, jsonify, request
 import requests, threading, time
-from glpi_download import glpi_main, init_session
+from glpi_download import glpi_main
 from glpi_upload import glpi_add_solution, glpi_add_followup, glpi_add_task_to_ticket
 import settings
 
 app = Flask(__name__)
 
 session_token = None
+
+def init_session():
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'user_token ' + settings.Api_Token,
+        'App-Token': settings.App_Token
+    }
+    
+    response = requests.get(f"{settings.Glpi_Url}/initSession", headers=headers)
+    
+    if response.status_code == 200:
+        session_toke = response.json()['session_token']
+        return session_toke
+    else:
+        print(f"Cannot initialize sesion: {response.status_code}")
+        print(response.text)
+        return None
 
 def refresh_sesion():
     global session_token
