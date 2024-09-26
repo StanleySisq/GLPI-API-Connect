@@ -1,7 +1,8 @@
 import requests
-from glpi_download import init_session, header
+from glpi_download import header
 from data import remove_ticket, perform_deletions
 import settings
+from app import session_token
 
 def glpi_add_solution(ticket_id, solution_content):
     try:
@@ -10,7 +11,6 @@ def glpi_add_solution(ticket_id, solution_content):
     except Exception as e:
         print(f"SQL Error: {e}")
 
-    session_token=init_session()
     data = {
     "input": {
         "items_id": ticket_id,  
@@ -25,7 +25,6 @@ def glpi_add_solution(ticket_id, solution_content):
     return response.json()
 
 def glpi_add_followup(ticket_id, followup_content):
-    session_token = init_session()
     data = {
         "input": {
             "items_id": ticket_id,  
@@ -38,7 +37,6 @@ def glpi_add_followup(ticket_id, followup_content):
     return response.json()
 
 def glpi_add_task_to_ticket(ticket_id, task_content, duration):
-    session_token = init_session()
     if not session_token:
         raise Exception("Cannot initialize sesion")
 

@@ -3,6 +3,7 @@ from time import sleep
 import requests, html, re
 from data import  add_or_update_ticket, load_tickets, remove_ticket
 import settings
+from app import session_token
 
 
 def init_session():
@@ -136,7 +137,6 @@ def send_ticket_closure_info(ticket_id, user_id):
 
 def glpi_main(tik_aid):
     all_details = {}
-    session_token = init_session()
     try:
         while True:
             sleeper = settings.Check_Time

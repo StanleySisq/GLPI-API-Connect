@@ -1,10 +1,21 @@
 from flask import Flask, jsonify, request
 import requests, threading, time
-from glpi_download import glpi_main
+from glpi_download import glpi_main, init_session
 from glpi_upload import glpi_add_solution, glpi_add_followup, glpi_add_task_to_ticket
 import settings
 
 app = Flask(__name__)
+
+session_token = None
+
+def refresh_sesion():
+    global session_token
+    while True:
+        try:
+            session_token = init_session()
+        except:
+            print("Error sesion refresh")
+        time.sleep(180000)
 
 def continuous_download():
     while True:
@@ -88,6 +99,7 @@ def add_task():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
+    threading.Thread(target=refresh_sesion).start()
     download_thread = threading.Thread(target=continuous_download)
     download_thread.daemon = True 
     download_thread.start()
