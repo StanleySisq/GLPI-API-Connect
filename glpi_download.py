@@ -3,26 +3,7 @@ from time import sleep
 import requests, html, re
 from data import  add_or_update_ticket, load_tickets, remove_ticket
 import settings
-from app import session_token
 
-
-def init_session():
-
-    headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'user_token ' + settings.Api_Token,
-        'App-Token': settings.App_Token
-    }
-    
-    response = requests.get(f"{settings.Glpi_Url}/initSession", headers=headers)
-    
-    if response.status_code == 200:
-        session_token = response.json()['session_token']
-        return session_token
-    else:
-        print(f"Cannot initialize sesion: {response.status_code}")
-        print(response.text)
-        return None
     
 def header(session_token):
     headers = {
@@ -135,7 +116,7 @@ def send_ticket_closure_info(ticket_id, user_id):
     response.raise_for_status()
     print("ticket closure sent")
 
-def glpi_main(tik_aid):
+def glpi_main(tik_aid, session_token):
     all_details = {}
     try:
         while True:

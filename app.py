@@ -49,7 +49,7 @@ def continuous_download():
                 ticked_id = file.read()   
 
         try:
-            download_result = glpi_main(ticked_id)  # JSON return
+            download_result = glpi_main(ticked_id, session_token)  # JSON return
             #print(download_result)
             if(download_result!={}):
                 response = requests.post(settings.Ticket_Post_Link, json=download_result)
@@ -76,7 +76,7 @@ def add_solution():
         return jsonify({"error": "ticket_id and solution are required"}), 400
 
     try:
-        glpi_response = glpi_add_solution(ticket_id, solution_content)
+        glpi_response = glpi_add_solution(ticket_id, solution_content, session_token)
         return jsonify(glpi_response), 200
     except Exception as e:
         print(jsonify({"error": str(e)}))
@@ -93,7 +93,7 @@ def add_followup():
         return jsonify({"error": "ticket_id and followup are required"}), 400
 
     try:
-        glpi_response = glpi_add_followup(ticket_id, followup_content)
+        glpi_response = glpi_add_followup(ticket_id, followup_content, session_token)
         return jsonify(glpi_response), 200
     except Exception as e:
         print(jsonify({"error": str(e)}))
@@ -111,7 +111,7 @@ def add_task():
         return jsonify({"error": "ticket_id, duration, task_content are required"}), 400
 
     try:
-        glpi_response = glpi_add_task_to_ticket(ticket_id, task_content, duration)
+        glpi_response = glpi_add_task_to_ticket(ticket_id, task_content, duration, session_token)
         return jsonify(glpi_response), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
