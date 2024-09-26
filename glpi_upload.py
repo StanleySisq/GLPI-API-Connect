@@ -2,9 +2,8 @@ import requests
 from glpi_download import header
 from data import remove_ticket, perform_deletions
 import settings
-from app import session_token
 
-def glpi_add_solution(ticket_id, solution_content):
+def glpi_add_solution(ticket_id, solution_content, session_token):
     try:
         remove_ticket(ticket_id)
         perform_deletions()
@@ -24,7 +23,7 @@ def glpi_add_solution(ticket_id, solution_content):
     response.raise_for_status()
     return response.json()
 
-def glpi_add_followup(ticket_id, followup_content):
+def glpi_add_followup(ticket_id, followup_content, session_token):
     data = {
         "input": {
             "items_id": ticket_id,  
@@ -36,7 +35,7 @@ def glpi_add_followup(ticket_id, followup_content):
     response.raise_for_status()  # check HTTP
     return response.json()
 
-def glpi_add_task_to_ticket(ticket_id, task_content, duration):
+def glpi_add_task_to_ticket(ticket_id, task_content, duration, session_token):
     if not session_token:
         raise Exception("Cannot initialize sesion")
 
