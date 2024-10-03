@@ -39,27 +39,32 @@ def continuous_download():
     while True:
         try:
             with open(settings.Id_File, "r") as file:
-                ticked_id = file.read()            
+                ticked_id = file.read().strip()
         except FileNotFoundError:
             print(f"No file {settings.Id_File} found, starting with id 1")
-            #ticked_id="1"
+            ticked_id = "1"
             with open(settings.Id_File, "w") as file:
-                file.write('1')
-            with open(settings.Id_File, "r") as file:
-                ticked_id = file.read()   
+                file.write(ticked_id)
 
         try:
-            download_result = glpi_main(ticked_id, session_token)  # JSON return
-            #print(download_result)
-            if(download_result!={}):
+            download_result = glpi_main(ticked_id, session_token)  
+            if download_result:  
+                print(f"Ticket download result: {download_result}")
+                
                 response = requests.post(settings.Ticket_Post_Link, json=download_result)
                 response.raise_for_status()
                 print("New ticket sent successfully.")
+
+                latest_ticket_id = download_result.get('id')
+                if latest_ticket_id:
+                    with open(settings.Id_File, "w") as file:
+                        file.write(str(latest_ticket_id))
+                    print(f"Updated latest ticket ID to {latest_ticket_id}")
         except Exception as e:
-            print("Ticket does not send")
+            print("Error while downloading or sending the ticket:")
             print(f"Error: {str(e)}")
-        
-        time.sleep(1) 
+       
+        time.sleep(5) 
 
 @app.route('/trigger', methods=['POST'])
 def trigger_event():
@@ -117,7 +122,9 @@ def add_task():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    threading.Thread(target=refresh_sesion).start()
+    session_fresher = threading.Thread(target=refresh_sesion)
+    session_fresher.daemon = True
+    session_fresher.start()
     download_thread = threading.Thread(target=continuous_download)
     download_thread.daemon = True 
     download_thread.start()
