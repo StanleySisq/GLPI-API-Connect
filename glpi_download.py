@@ -120,114 +120,99 @@ def send_ticket_closure_info(ticket_id, user_id):
 
 def glpi_main(tik_aid_main, session_token):
     all_details = {}
-    br=0
     try:
-        while True:
-            tik_aid=tik_aid_main
+        tik_aid = tik_aid_main
 
-            while 5:
-                sleeper = settings.Check_Time
-                if not session_token:
-                    print("Session token is invalid or missing.")
-                    br=1
+        while True:
+            sleeper = settings.Check_Time
+            if not session_token:
+                print("Session token is invalid or missing.")
+                break
+            
+            try:
+                latest_ticket_id = search_latest_ticket(session_token, str(int(tik_aid) + 5))
+            except Exception as e:
+                print(f"Error searching for latest ticket: {e}")
+                break
+            
+            if latest_ticket_id is None:
+                print("No new tickets found, skipping iteration.")
+                break
+
+            if int(tik_aid) < latest_ticket_id:
+                try:
+                    with open(settings.Id_File, "w") as file:
+                        file.write(str(latest_ticket_id))
+                except Exception as e:
+                    print(f"Error writing to file: {e}")
                     break
                 
                 try:
-                    latest_ticket_id = search_latest_ticket(session_token, str(int(tik_aid) + 5))
+                    ticket_details = get_ticket_details(session_token, latest_ticket_id)
                 except Exception as e:
-                    print(f"Error searching for latest ticket: {e}")
-                    br=1
+                    print(f"Error getting ticket details: {e}")
                     break
                 
-                if latest_ticket_id is None:
-                    print("No new tickets found, skipping iteration.")
-                    br=1
-                    break
-
-                if int(tik_aid) < latest_ticket_id:
-                    try:
-                        with open(settings.Id_File, "w") as file:
-                            file.write(str(latest_ticket_id))
-                    except Exception as e:
-                        print(f"Error writing to file: {e}")
-                        br=1
-                        break
+                if ticket_details:
+                    users_id_lastupdater = ticket_details.get('users_id_lastupdater')
                     
-                    try:
-                        ticket_details = get_ticket_details(session_token, latest_ticket_id)
-                    except Exception as e:
-                        print(f"Error getting ticket details: {e}")
-                        br=1
-                        break
-                    
-                    if ticket_details:
-                        users_id_lastupdater = ticket_details.get('users_id_lastupdater')
-                        
-                        if users_id_lastupdater:
-                            try:
-                                user_details = get_user_details(session_token, users_id_lastupdater)
-                            except Exception as e:
-                                print(f"Error getting user details: {e}")
-                                br=1
-                                break
-                            
-                            merged_details = merge_ticket_and_user_details(ticket_details, user_details)
-                            all_details = merged_details
-                            print("New ticket Downloaded")
-                            
-                            add_or_update_ticket(latest_ticket_id, 1)
-                            br=1
+                    if users_id_lastupdater:
+                        try:
+                            user_details = get_user_details(session_token, users_id_lastupdater)
+                        except Exception as e:
+                            print(f"Error getting user details: {e}")
                             break
-                        else:
-                            print("No 'users_id_lastupdater' in ticket details.")
-                    else:
-                        print("No ticket details available.")
-                else:
-                    tik_nas = int(tik_aid) + 1
-                    tik_aid=tik_nas
-                    
-                    #print("Searching for other tickets...")
-                    sleeper = 2 
-
-                tickets = load_tickets()
-                
-                if tickets:
-                    for ticket in tickets:
-                        ticket_number, last_checked_id = ticket
-                        try:
-                            followups = get_followups(ticket_number, session_token)
-                        except Exception as e:
-                            print(f"Error getting follow-ups for ticket {ticket_number}: {e}")
-                            continue 
                         
-                        for followup in followups:
-                            followup_id = int(followup["id"])
-                            
-                            if followup_id > last_checked_id:
-                                try:
-                                    clean = re.compile('<.*?>')
-                                    content_cleaned = re.sub(clean, ' ', html.unescape(followup["content"]))
-                                    send_followup(content_cleaned, ticket_number, ticket_details["users_id_lastupdater"])
-                                    
-                                    last_checked_id = followup_id
-                                    add_or_update_ticket(ticket_number, last_checked_id)
-                                except Exception as e:
-                                    print(f"Error sending follow-up for ticket {ticket_number}: {e}")
-                                    continue  
+                        merged_details = merge_ticket_and_user_details(ticket_details, user_details)
+                        all_details = merged_details
+                        print("New ticket downloaded.")
+                        
+                        add_or_update_ticket(latest_ticket_id, 1)
+                    else:
+                        print("No 'users_id_lastupdater' in ticket details.")
+                else:
+                    print("No ticket details available.")
+            else:
+                sleeper = 3  
 
-                        try:
-                            if not is_ticket_open(session_token, ticket_number):
-                                print(f"Ticket {ticket_number} is closed.")
-                                ticket_details = get_ticket_details(session_token, ticket_number)
-                                users_id_lastupdater = ticket_details.get('users_id_lastupdater')
-                                send_ticket_closure_info(ticket_number, users_id_lastupdater)
-                                remove_ticket(ticket_number, 4)
-                        except Exception as e:
-                            print(f"Error checking or closing ticket {ticket_number}: {e}")
-                            continue
+            tickets = load_tickets()
+            
+            if tickets:
+                for ticket in tickets:
+                    ticket_number, last_checked_id = ticket
+                    try:
+                        followups = get_followups(ticket_number, session_token)
+                    except Exception as e:
+                        print(f"Error getting follow-ups for ticket {ticket_number}: {e}")
+                        continue 
+                    
+                    for followup in followups:
+                        followup_id = int(followup["id"])
+                        
+                        if followup_id > last_checked_id:
+                            try:
+                                clean = re.compile('<.*?>')
+                                content_cleaned = re.sub(clean, ' ', html.unescape(followup["content"]))
+                                send_followup(content_cleaned, ticket_number, ticket_details["users_id_lastupdater"])
+                                
+                                last_checked_id = followup_id
+                                add_or_update_ticket(ticket_number, last_checked_id)
+                            except Exception as e:
+                                print(f"Error sending follow-up for ticket {ticket_number}: {e}")
+                                continue 
 
-                sleep(sleeper)
-            if br==1: break
+                    try:
+                        if not is_ticket_open(session_token, ticket_number):
+                            print(f"Ticket {ticket_number} is closed.")
+                            ticket_details = get_ticket_details(session_token, ticket_number)
+                            users_id_lastupdater = ticket_details.get('users_id_lastupdater')
+                            send_ticket_closure_info(ticket_number, users_id_lastupdater)
+                            remove_ticket(ticket_number, 4)
+                    except Exception as e:
+                        print(f"Error checking or closing ticket {ticket_number}: {e}")
+                        continue
+
+            sleep(sleeper)
 
     except Exception as e:
         print(f"Main GLPI Connector ERROR: {e}")
