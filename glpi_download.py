@@ -168,6 +168,7 @@ def glpi_main(tik_aid_main, session_token):
                         print("New ticket downloaded.")
                         
                         add_or_update_ticket(latest_ticket_id, 1)
+                        break
                     else:
                         print("No 'users_id_lastupdater' in ticket details.")
                 else:
