@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 import requests, threading, time
 from glpi_download import glpi_main
-from glpi_upload import glpi_add_solution, glpi_add_followup, glpi_add_task_to_ticket
+from glpi_upload import glpi_add_solution, glpi_add_followup, glpi_add_task_to_ticket, glpi_create_ticket
 import settings
 
 app = Flask(__name__)
@@ -117,6 +117,23 @@ def add_task():
 
     try:
         glpi_response = glpi_add_task_to_ticket(ticket_id, task_content, duration, session_token)
+        return jsonify(glpi_response), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/add_ticket', methods=['POST'])
+def add_ticket():
+    data = request.json
+
+    title = data.get('title')
+    description = data.get('description')
+    assigned_user_id = data.get('assigned_user_id')
+
+    if not title or not description or not assigned_user_id:
+        return jsonify({"error": "title, description and assigned_user_id are required"}), 400
+
+    try:
+        glpi_response = glpi_create_ticket(session_token, title, description, assigned_user_id)
         return jsonify(glpi_response), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
