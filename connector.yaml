@@ -1,0 +1,186 @@
+swagger: '2.0'
+info:
+  title: GLPI Solution API
+  description: API to add solutions to GLPI tickets
+  version: 1.0.0
+host: 127.1.1.1:5000
+schemes:
+  - http
+paths:
+  /add_solution:
+    post:
+      summary: Add a solution to a specific GLPI ticket
+      description: This endpoint allows you to add a solution to a specific ticket in GLPI.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Ticket ID and solution content
+          required: true
+          schema:
+            type: object
+            properties:
+              ticket_id:
+                type: integer
+                description: The ID of the ticket
+                example: 123
+              solution:
+                type: string
+                description: The content of the solution
+                example: This is the solution to the problem.
+      responses:
+        '200':
+          description: Solution added successfully
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: ID of the added solution
+                example: 456
+              message:
+                type: string
+                description: Confirmation message
+                example: Solution added successfully.
+        '400':
+          description: Invalid input
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error message
+                example: ticket_id and solution are required.
+        '500':
+          description: Server error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error message
+                example: Internal server error
+      operationId: Add_solution
+  /add_followup:
+    post:
+      summary: Add a followup to a specific GLPI ticket
+      description: This endpoint allows you to add a followup to a specific ticket in GLPI.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Ticket ID and followup content
+          required: true
+          schema:
+            type: object
+            properties:
+              ticket_id:
+                type: integer
+                description: The ID of the ticket
+                example: 123
+              solution:
+                type: string
+                description: The content of the followup
+                example: This is the followup to the problem.
+      responses:
+        '200':
+          description: Followup added successfully
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: ID of the added followup
+                example: 456
+              message:
+                type: string
+                description: Confirmation message
+                example: Followup added successfully.
+        '400':
+          description: Invalid input
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error message
+                example: ticket_id and followup are required.
+        '500':
+          description: Server error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error message
+                example: Internal server error
+      operationId: Add_followup
+  /add_task:
+    post:
+      summary: Add a task to a specific GLPI ticket
+      description: This endpoint allows you to add a task to a specific ticket in GLPI.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Ticket ID, task name, task content
+          required: true
+          schema:
+            type: object
+            properties:
+              ticket_id:
+                type: integer
+                description: The ID of the ticket
+                example: 123
+              task_content:
+                type: string
+                description: The content of the task
+                example: This is the task to the problem.
+              duration:
+                type: integer
+                description: The duration of the task (seconds).
+                example: 1800
+      responses:
+        '200':
+          description: Task added successfully
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: ID of the added task
+                example: 456
+              message:
+                type: string
+                description: Confirmation message
+                example: Task added successfully.
+        '400':
+          description: Invalid input
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error message
+                example: ticket_id and task are required.
+        '500':
+          description: Server error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error message
+                example: Internal server error
+      operationId: Add_task
+securityDefinitions: {}
+basePath: /

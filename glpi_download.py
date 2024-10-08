@@ -18,7 +18,7 @@ def search_latest_ticket(session_token, last_tik):
     
     params = {
         'range': ranga, 
-        'sort': 15,        # Sort by 'data'
+        'sort': 2,        # Sort by 'data'
         'order': 'DESC'   
     }
     
