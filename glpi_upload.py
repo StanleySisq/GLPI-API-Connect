@@ -61,24 +61,23 @@ def get_user_id_by_gid(session_token, gid):
     search_url = f"{settings.Glpi_Url}/search/User"
     
     params = {
-        "criteria[0][field]": "gid",  # Zakładam, że GID jest polem w GLPI
+        "criteria[0][field]": 1, 
         "criteria[0][searchtype]": "equals",  
         "criteria[0][value]": gid,
-        "forcedisplay[0]": 2,  # 2 to ID użytkownika w GLPI
-        "forcedisplay[1]": "gid",  # Zakładamy, że GID też jest wyświetlany
+        "forcedisplay[0]": 2,  # 2 is user ID in GLPI
+        "forcedisplay[1]": 1,  # 1 is user login/name (which contains the GID)
     }
 
-    # Wykonanie zapytania do GLPI
     response = requests.get(search_url, headers=header(session_token), params=params)
 
     if response.status_code == 200:
         result = response.json()
 
         if result.get("data"):
-            user_id = result["data"][0].get("2")  # Pobieramy ID użytkownika na podstawie odpowiedzi
+            user_id = result["data"][0].get("2") 
             return user_id
         else:
-            print("No user found with this GID.")
+            print(f"No user found with GID: {gid}")
             return None
     else:
         print(f"Error fetching user data: {response.status_code}")
