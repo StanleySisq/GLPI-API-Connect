@@ -57,7 +57,7 @@ def glpi_add_task_to_ticket(ticket_id, task_content, duration, session_token):
     else:
         raise Exception(f"Error adding tasks: {response.status_code} - {response.text}")
 
-def get_user_id_by_gid(session_token, gid):
+def get_user_id_and_unit_by_gid(session_token, gid):
     search_url = f"{settings.Glpi_Url}/search/User"
     
     params = {
@@ -66,6 +66,7 @@ def get_user_id_by_gid(session_token, gid):
         "criteria[0][value]": gid,
         "forcedisplay[0]": 2,  # 2 is user ID in GLPI
         "forcedisplay[1]": 1,  # 1 is user login/name (which contains the GID)
+        "forcedisplay[2]": 3,  
     }
 
     response = requests.get(search_url, headers=header(session_token), params=params)
@@ -74,32 +75,34 @@ def get_user_id_by_gid(session_token, gid):
         result = response.json()
 
         if result.get("data"):
-            user_id = result["data"][0].get("2") 
-            return user_id
+            user_id = result["data"][0].get("2")  # User ID
+            unit_id = result["data"][0].get("3")  # Unit ID
+            return user_id, unit_id  # Return both IDs
         else:
             print(f"No user found with GID: {gid}")
-            return None
+            return None, None
     else:
         print(f"Error fetching user data: {response.status_code}")
         print(response.text)
-        return None
+        return None, None
     
-def glpi_create_ticket(session_token, title, description, assigned_user_email, assigned_technic_id):
-    assigned_user_id = get_user_id_by_gid(session_token, assigned_user_email)
+def glpi_create_ticket(session_token, title, description, assigned_user_gid, assigned_technic_id):
+    assigned_user_id, unit_id = get_user_id_and_unit_by_gid(session_token, assigned_user_gid)
     
     if not assigned_user_id:
-        raise Exception(f"User with email {assigned_user_email} not found.")
+        raise Exception(f"User with GID {assigned_user_gid} not found.")
 
     ticket_data = {
         "input": {
             "name": title,
             "content": description,
-            "requesttypes_id": 2,  # 2 is request  1 is incident
+            "requesttypes_id": 2,  # 2 is request, 1 is incident
             "urgency": 3,  # (1-5)
             "impact": 3,  # (1-5)
-            "priority": 3,  #(1-5)
+            "priority": 3,  # (1-5)
             "type": 2,  # 1 is incident, 2 is request
-            "users_id_recipient": assigned_user_id  
+            "users_id_recipient": assigned_user_id,
+            "entities_id": unit_id  # Add unit ID to the ticket data
         }
     }
 
