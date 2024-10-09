@@ -60,12 +60,14 @@ def glpi_add_task_to_ticket(ticket_id, task_content, duration, session_token):
 def get_user_id_by_email(session_token, email):
     search_url = f"{settings.Glpi_Url}/search/User"
     
+    email = email.lower()
+
     params = {
-        "criteria[0][field]": 5,  
-        "criteria[0][searchtype]": "equals", 
+        "criteria[0][field]": 5,  # 5 is e-mail
+        "criteria[0][searchtype]": "contains",  
         "criteria[0][value]": email,
         "forcedisplay[0]": 2,  # "2" is user ID in GLPI
-        "forcedisplay[1]": 9,  # "9" is user e-mail adress
+        "forcedisplay[1]": 9,  # "9" is user e-mail address
     }
 
     response = requests.get(search_url, headers=header(session_token), params=params)
@@ -74,8 +76,13 @@ def get_user_id_by_email(session_token, email):
         result = response.json()
 
         if result.get("data"):
-            user_id = result["data"][0]["2"]  # Take user ID
-            return user_id
+            for user in result["data"]:
+                if user["9"].lower() == email:  
+                    user_id = user["2"]  
+                    return user_id
+
+            print("No user found with this email.")
+            return None
         else:
             print("No user found with this email.")
             return None
