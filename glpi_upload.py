@@ -57,35 +57,28 @@ def glpi_add_task_to_ticket(ticket_id, task_content, duration, session_token):
     else:
         raise Exception(f"Error adding tasks: {response.status_code} - {response.text}")
 
-def get_user_id_by_email(session_token, email):
+def get_user_id_by_gid(session_token, gid):
     search_url = f"{settings.Glpi_Url}/search/User"
-
-    email_lower = email.lower()
-
+    
     params = {
-        "criteria[0][field]": 5,   
-        "criteria[0][searchtype]": "contains",  
-        "criteria[0][value]": email_lower,
-        "forcedisplay[0]": 2,  # 2 is ID user
-        "forcedisplay[1]": 9,  # 9  e-mail
+        "criteria[0][field]": "gid",  # Zakładam, że GID jest polem w GLPI
+        "criteria[0][searchtype]": "equals",  
+        "criteria[0][value]": gid,
+        "forcedisplay[0]": 2,  # 2 to ID użytkownika w GLPI
+        "forcedisplay[1]": "gid",  # Zakładamy, że GID też jest wyświetlany
     }
 
+    # Wykonanie zapytania do GLPI
     response = requests.get(search_url, headers=header(session_token), params=params)
 
     if response.status_code == 200:
         result = response.json()
 
         if result.get("data"):
-            for user in result["data"]:
-                email_from_glpi = user.get("9").lower()  
-                if email_from_glpi == email_lower:
-                    user_id = user.get("2")
-                    return user_id
-
-            print("No user found with this email.")
-            return None
+            user_id = result["data"][0].get("2")  # Pobieramy ID użytkownika na podstawie odpowiedzi
+            return user_id
         else:
-            print("No user found with this email.")
+            print("No user found with this GID.")
             return None
     else:
         print(f"Error fetching user data: {response.status_code}")
@@ -93,7 +86,7 @@ def get_user_id_by_email(session_token, email):
         return None
     
 def glpi_create_ticket(session_token, title, description, assigned_user_email, assigned_technic_id):
-    assigned_user_id = get_user_id_by_email(session_token, assigned_user_email)
+    assigned_user_id = get_user_id_by_gid(session_token, assigned_user_email)
     
     if not assigned_user_id:
         raise Exception(f"User with email {assigned_user_email} not found.")
