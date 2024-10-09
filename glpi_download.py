@@ -100,11 +100,12 @@ def is_ticket_open(session_token, ticket_id):
     if response.status_code == 200:
         ticket_details = response.json()
         status = ticket_details.get('status')
-        return status == 1
+        
+        return status in [1, 2] 
     else:
         print(f"Error checking ticket status: {response.status_code}")
         print(response.text)
-        return False  
+        return False
 
 
 def send_ticket_closure_info(ticket_id, user_id):

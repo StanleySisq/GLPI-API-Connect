@@ -1,12 +1,81 @@
 swagger: '2.0'
 info:
   title: GLPI Solution API
-  description: API to add solutions to GLPI tickets
+  description: 
+    API to manage GLPI tickets including adding tasks, solutions, followups, and
+    tickets.
   version: 1.0.0
-host: 127.1.1.1:5000
+host: 172.17.17.81:5000
 schemes:
   - http
 paths:
+  /add_ticket:
+    post:
+      summary: Create a new GLPI ticket
+      description: This endpoint allows you to create a new ticket in GLPI.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Ticket title, description, and assigned user
+          required: true
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+                description: The title of the new ticket
+                example: Printer is not working
+              description:
+                type: string
+                description: The description of the ticket
+                example: 
+                  The office printer is malfunctioning and won't print any
+                  documents.
+              assigned_user_id:
+                type: string
+                description: The user email of the assigned technician
+                example: jan.kowalski@email.com
+              assigned_technic_id:
+                type: string
+                description: The technic id of the assigned technician
+                example: idek
+      responses:
+        '200':
+          description: Ticket created successfully
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: ID of the created ticket
+                example: 456
+              message:
+                type: string
+                description: Confirmation message
+                example: Ticket created successfully.
+        '400':
+          description: Invalid input
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error message
+                example: title, description, and assigned_user_id are required.
+        '500':
+          description: Server error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error message
+                example: Internal server error
+      operationId: Add_ticket
   /add_solution:
     post:
       summary: Add a solution to a specific GLPI ticket
@@ -84,7 +153,7 @@ paths:
                 type: integer
                 description: The ID of the ticket
                 example: 123
-              solution:
+              followup_content:
                 type: string
                 description: The content of the followup
                 example: This is the followup to the problem.
@@ -183,4 +252,3 @@ paths:
                 example: Internal server error
       operationId: Add_task
 securityDefinitions: {}
-basePath: /
