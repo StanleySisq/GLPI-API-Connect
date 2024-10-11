@@ -62,11 +62,10 @@ def get_user_id_and_unit_by_gid(session_token, gid):
     
     params = {
         "criteria[0][field]": 1,  
-        "criteria[0][searchtype]": "equals",
-        "criteria[0][value]": gid,
+        "criteria[0][searchtype]": "contains",  
+        "criteria[0][value]": gid, 
         "forcedisplay[0]": 2,  
-        "forcedisplay[1]": 1,  
-        "forcedisplay[2]": 3   
+        "forcedisplay[1]": 1
     }
 
     response = requests.get(search_url, headers=header(session_token), params=params)
@@ -76,19 +75,18 @@ def get_user_id_and_unit_by_gid(session_token, gid):
 
         if result.get("data"):
             user_data = result["data"][0]
-            user_id = user_data.get("2")  # User ID
-            unit_id = user_data.get("3")  # Unit ID 
-            return user_id, unit_id
+            user_id = user_data.get("2")  # User I
+            return user_id
         else:
             print(f"No user found with GID: {gid}")
-            return None, None
+            return None
     else:
         print(f"Error fetching user data: {response.status_code}")
         print(response.text)
-        return None, None
+        return None
 
-def glpi_create_ticket(session_token, title, description, assigned_user_gid, assigned_technic_id):
-    assigned_user_id, unit_id = get_user_id_and_unit_by_gid(session_token, assigned_user_gid)
+def glpi_create_ticket(session_token, title, description, assigned_user_gid, assigned_technic_id, unit_id):
+    assigned_user_id = get_user_id_and_unit_by_gid(session_token, assigned_user_gid)
     
     ticket_data = {
         "input": {
@@ -117,10 +115,10 @@ def glpi_create_ticket(session_token, title, description, assigned_user_gid, ass
         try:
             assign_response = glpi_assign_user_to_ticket(session_token, ticket_id, assigned_user_id, 1)
         except:
-            print("Ticket created but failed to assign technician")
+            print("Ticket created but failed to assign user")
         try:
             assign_response = glpi_assign_user_to_ticket(session_token, ticket_id, assigned_technic_id, 2)
-            print(f"Technician assigned successfully to ticket {ticket_id}.")
+            #print(f"Technician assigned successfully to ticket {ticket_id}.")
             return response
         except Exception as e:
             raise Exception(f"Ticket created but failed to assign technician: {str(e)}")
