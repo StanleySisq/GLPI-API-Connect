@@ -107,6 +107,9 @@ def glpi_create_ticket(session_token, title, description, assigned_user_gid, ass
         ticket_info = response.json()
         ticket_id = ticket_info.get("id") 
 
+        with open(settings.Id_File, "w") as file:
+                file.write(ticket_id)
+
         if not assigned_user_id:
             print(f"User with GID {assigned_user_gid} not found.")
         else:
