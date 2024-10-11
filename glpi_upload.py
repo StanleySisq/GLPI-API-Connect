@@ -92,11 +92,11 @@ def glpi_create_ticket(session_token, title, description, assigned_user_gid, ass
         "input": {
             "name": title,
             "content": description,
-            "requesttypes_id": 2,  
+            "requesttypes_id": 1,  
             "urgency": 3,  
             "impact": 3,  
             "priority": 3,  
-            "type": 2,  
+            "type": 1,  
             "entities_id": unit_id  
         }
     }
@@ -120,7 +120,7 @@ def glpi_create_ticket(session_token, title, description, assigned_user_gid, ass
             assign_response = glpi_assign_user_to_ticket(session_token, ticket_id, assigned_technic_id, 2)
             #print(f"Technician assigned successfully to ticket {ticket_id}.")
             if close_after == "Yes":
-                response_close = glpi_close_ticket(session_token, ticket_id)
+                response_close = glpi_close_ticket(session_token, ticket_id, description)
 
             return response.json()
         except Exception as e:
@@ -145,7 +145,7 @@ def glpi_assign_user_to_ticket(session_token, ticket_id, user_id, type):
     else:
         print(f"Error assigning technician: {response.status_code} - {response.text}")
 
-def glpi_close_ticket(session_token, ticket_id):
+def glpi_close_ticket(session_token, ticket_id, content):
 
     solution_content="<p>Zgłoszenie zamknięto</p>"
 
@@ -153,7 +153,7 @@ def glpi_close_ticket(session_token, ticket_id):
         "input": {
             "status": 6,  
             "solution": solution_content,  
-            "content": solution_content,  
+            "content": content,  
             "solutiontypes_id": 3,  
             "solutiontemplates_id": 5  
         }
