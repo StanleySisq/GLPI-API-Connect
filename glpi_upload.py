@@ -61,12 +61,12 @@ def get_user_id_and_unit_by_gid(session_token, gid):
     search_url = f"{settings.Glpi_Url}/search/User"
     
     params = {
-        "criteria[0][field]": 1, 
-        "criteria[0][searchtype]": "equals",  
+        "criteria[0][field]": 1,  
+        "criteria[0][searchtype]": "equals",
         "criteria[0][value]": gid,
-        "forcedisplay[0]": 2,  # 2 is user ID in GLPI
-        "forcedisplay[1]": 1,  # 1 is user login/name (which contains the GID)
-        "forcedisplay[2]": 3,  
+        "forcedisplay[0]": 2,  
+        "forcedisplay[1]": 1,  
+        "forcedisplay[2]": 3   
     }
 
     response = requests.get(search_url, headers=header(session_token), params=params)
@@ -75,9 +75,10 @@ def get_user_id_and_unit_by_gid(session_token, gid):
         result = response.json()
 
         if result.get("data"):
-            user_id = result["data"][0].get("2")  # User ID
-            unit_id = result["data"][0].get("3")  # Unit ID
-            return user_id, unit_id  # Return both IDs
+            user_data = result["data"][0]
+            user_id = user_data.get("2")  # User ID
+            unit_id = user_data.get("3")  # Unit ID 
+            return user_id, unit_id
         else:
             print(f"No user found with GID: {gid}")
             return None, None
@@ -85,24 +86,20 @@ def get_user_id_and_unit_by_gid(session_token, gid):
         print(f"Error fetching user data: {response.status_code}")
         print(response.text)
         return None, None
-    
+
 def glpi_create_ticket(session_token, title, description, assigned_user_gid, assigned_technic_id):
     assigned_user_id, unit_id = get_user_id_and_unit_by_gid(session_token, assigned_user_gid)
     
-    if not assigned_user_id:
-        raise Exception(f"User with GID {assigned_user_gid} not found.")
-
     ticket_data = {
         "input": {
             "name": title,
             "content": description,
-            "requesttypes_id": 2,  # 2 is request, 1 is incident
-            "urgency": 3,  # (1-5)
-            "impact": 3,  # (1-5)
-            "priority": 3,  # (1-5)
-            "type": 2,  # 1 is incident, 2 is request
-            "users_id_recipient": assigned_user_id,
-            "entities_id": unit_id  # Add unit ID to the ticket data
+            "requesttypes_id": 2,  
+            "urgency": 3,  
+            "impact": 3,  
+            "priority": 3,  
+            "type": 2,  
+            "entities_id": unit_id  
         }
     }
 
@@ -112,30 +109,31 @@ def glpi_create_ticket(session_token, title, description, assigned_user_gid, ass
         ticket_info = response.json()
         ticket_id = ticket_info.get("id") 
 
-        if ticket_id:
-            print(f"Ticket created successfully with ID: {ticket_id}")
-
-            try:
-                assign_response = glpi_assign_technician_to_ticket(session_token, ticket_id, assigned_technic_id)
-                print(f"Technician assigned successfully to ticket {ticket_id}.")
-                return {
-                    "ticket": ticket_info,
-                    "technician_assignment": assign_response
-                }
-            except Exception as e:
-                raise Exception(f"Ticket created but failed to assign technician: {str(e)}")
+        if not assigned_user_id:
+            print(f"User with GID {assigned_user_gid} not found.")
         else:
-            raise Exception("Ticket created but ID not found in response.")
+            print(assigned_user_id)
+
+        try:
+            assign_response = glpi_assign_user_to_ticket(session_token, ticket_id, assigned_user_id, 1)
+        except:
+            print("Ticket created but failed to assign technician")
+        try:
+            assign_response = glpi_assign_user_to_ticket(session_token, ticket_id, assigned_technic_id, 2)
+            print(f"Technician assigned successfully to ticket {ticket_id}.")
+            return response
+        except Exception as e:
+            raise Exception(f"Ticket created but failed to assign technician: {str(e)}")
     else:
         raise Exception(f"Error creating ticket: {response.status_code} - {response.text}")
-    
-def glpi_assign_technician_to_ticket(session_token, ticket_id, technician_user_id):
+
+def glpi_assign_user_to_ticket(session_token, ticket_id, user_id, type):
     data = {
         "input": {
-            "itemtype": "Ticket",  
-            "items_id": ticket_id, 
-            "users_id": technician_user_id,  
-            "type": 2  # 2 means "Technician"
+            "tickets_id": ticket_id,
+            "users_id": user_id,
+            "type": str(type),  
+            "use_notification": "1"  
         }
     }
 
