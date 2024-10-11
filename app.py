@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 import requests, threading, time
 from glpi_download import glpi_main
-from glpi_upload import glpi_add_solution, glpi_add_followup, glpi_add_task_to_ticket, glpi_create_ticket
+from glpi_upload import glpi_add_solution, glpi_add_followup, glpi_add_task_to_ticket, glpi_create_ticket, glpi_close_ticket
 import settings
 
 app = Flask(__name__)
@@ -130,12 +130,14 @@ def add_ticket():
     assigned_user_id = str(data.get('assigned_user_id'))
     assigned_technic_id = data.get('assigned_technic_id')
     unit_id = data.get('unit_id')
+    close_after = data.get('close_after')
 
     if not title or not description or not assigned_user_id or not assigned_technic_id or not unit_id:
         return jsonify({"error": "title, description, assigned technic and assigned_user_id are required"}), 400
 
     try:
-        glpi_response = glpi_create_ticket(session_token, title, description, assigned_user_id, assigned_technic_id, unit_id)
+        glpi_response = glpi_create_ticket(session_token, title, description, assigned_user_id, assigned_technic_id, unit_id, close_after)
+
         return jsonify(glpi_response), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

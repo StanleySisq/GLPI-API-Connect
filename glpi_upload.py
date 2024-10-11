@@ -85,7 +85,7 @@ def get_user_id_and_unit_by_gid(session_token, gid):
         print(response.text)
         return None
 
-def glpi_create_ticket(session_token, title, description, assigned_user_gid, assigned_technic_id, unit_id):
+def glpi_create_ticket(session_token, title, description, assigned_user_gid, assigned_technic_id, unit_id, close_after):
     assigned_user_id = get_user_id_and_unit_by_gid(session_token, assigned_user_gid)
     
     ticket_data = {
@@ -119,11 +119,14 @@ def glpi_create_ticket(session_token, title, description, assigned_user_gid, ass
         try:
             assign_response = glpi_assign_user_to_ticket(session_token, ticket_id, assigned_technic_id, 2)
             #print(f"Technician assigned successfully to ticket {ticket_id}.")
+            if close_after == "Yes":
+                response = glpi_close_ticket(session_token, ticket_id)
+
             return response
         except Exception as e:
-            raise Exception(f"Ticket created but failed to assign technician: {str(e)}")
+            print( f"Ticket created but failed to assign technician: {str(e)}")
     else:
-        raise Exception(f"Error creating ticket: {response.status_code} - {response.text}")
+        print(f"Error creating ticket: {response.status_code} - {response.text}")
 
 def glpi_assign_user_to_ticket(session_token, ticket_id, user_id, type):
     data = {
@@ -140,4 +143,31 @@ def glpi_assign_user_to_ticket(session_token, ticket_id, user_id, type):
     if response.status_code == 201:
         return response.json()
     else:
-        raise Exception(f"Error assigning technician: {response.status_code} - {response.text}")
+        print(f"Error assigning technician: {response.status_code} - {response.text}")
+
+def glpi_close_ticket(session_token, ticket_id):
+
+    solution_content="<p>Zgłoszenie zamknięto</p>"
+
+    data = {
+        "input": {
+            "status": 6,  
+            "solution": solution_content,  
+            "content": solution_content,  
+            "solutiontypes_id": 3,  
+            "solutiontemplates_id": 5  
+        }
+    }
+
+    response = requests.put(
+        f"{settings.Glpi_Url}/Ticket/{ticket_id}", 
+        headers=header(session_token), 
+        json=data
+    )
+
+    if response.status_code == 200:
+        print(f"Ticket {ticket_id} was closed succesfully.")
+        return response.json()
+    else:
+        print(f"Error closing ticket {ticket_id}: {response.status_code} - {response.text}")
+        response.raise_for_status()

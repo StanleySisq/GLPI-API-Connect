@@ -20,7 +20,7 @@ paths:
       parameters:
         - in: body
           name: body
-          description: Ticket title, description, and assigned user
+          description: Ticket title, description, and assigned user itp
           required: true
           schema:
             type: object
@@ -43,6 +43,14 @@ paths:
                 type: string
                 description: The technic id of the assigned technician
                 example: idek
+              unit_id:
+                type: integer
+                description: The Unit od user
+                example: 2
+              close_after:
+                type: string
+                description: Close ticket imidiatelli
+                example: Yes or No
       responses:
         '200':
           description: Ticket created successfully
@@ -252,3 +260,4 @@ paths:
                 example: Internal server error
       operationId: Add_task
 securityDefinitions: {}
+basePath: /
