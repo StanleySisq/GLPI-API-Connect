@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   title: GLPI Solution API
-  description: 
+  description: >-
     API to manage GLPI tickets including adding tasks, solutions, followups, and
     tickets.
   version: 1.0.0
@@ -32,7 +32,7 @@ paths:
               description:
                 type: string
                 description: The description of the ticket
-                example: 
+                example: >-
                   The office printer is malfunctioning and won't print any
                   documents.
               assigned_user_id:
@@ -57,14 +57,34 @@ paths:
           schema:
             type: object
             properties:
-              id:
-                type: integer
-                description: ID of the created ticket
-                example: 456
               message:
                 type: string
                 description: Confirmation message
                 example: Ticket created successfully.
+              ticket:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: The unique identifier for the created ticket
+                    example: 123456
+                  name:
+                    type: string
+                    description: The title of the created ticket
+                    example: Support Request for Software Issue
+                  status:
+                    type: string
+                    description: Current status of the ticket
+                    example: Open
+                  assigned_to:
+                    type: string
+                    description: The user assigned to the ticket
+                    example: user@example.com
+                  created_at:
+                    type: string
+                    format: date-time
+                    description: Timestamp of when the ticket was created
+                    example: '2024-10-11T15:30:00Z'
         '400':
           description: Invalid input
           schema:

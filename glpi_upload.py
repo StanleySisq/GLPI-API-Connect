@@ -107,9 +107,6 @@ def glpi_create_ticket(session_token, title, description, assigned_user_gid, ass
         ticket_info = response.json()
         ticket_id = ticket_info.get("id") 
 
-        with open(settings.Id_File, "w") as file:
-                file.write(ticket_id)
-
         if not assigned_user_id:
             print(f"User with GID {assigned_user_gid} not found.")
         else:
@@ -123,9 +120,9 @@ def glpi_create_ticket(session_token, title, description, assigned_user_gid, ass
             assign_response = glpi_assign_user_to_ticket(session_token, ticket_id, assigned_technic_id, 2)
             #print(f"Technician assigned successfully to ticket {ticket_id}.")
             if close_after == "Yes":
-                response = glpi_close_ticket(session_token, ticket_id)
+                response_close = glpi_close_ticket(session_token, ticket_id)
 
-            return response
+            return response.json()
         except Exception as e:
             print( f"Ticket created but failed to assign technician: {str(e)}")
     else:
