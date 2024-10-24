@@ -123,7 +123,7 @@ def get_assigned_users_from_ticket(session_token, ticket_id):
     url = f"{settings.Glpi_Url}/search/Ticket_User"
 
     params = {
-        "criteria[0][field]": "item_ticket_id",
+        "criteria[0][field]": "tickets_id",
         "criteria[0][searchtype]": "equals",
         "criteria[0][value]": ticket_id,
         "forcedisplay[0]": "users_id",  
@@ -197,6 +197,7 @@ def glpi_main(tik_aid_main, session_token):
                     except Exception as e:
                         print("No Requester")
                         users_id_lastupdater = ticket_details.get('users_id_lastupdater')
+                        ass_technician_id = "None"
                     
                     if ass_technician_id in ["None", 8, 7, 2747, 2702, 2703, 2731, 2555, 2662, 3793]:
                         try:
