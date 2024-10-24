@@ -129,18 +129,18 @@ def get_assigned_users_from_ticket(session_token, ticket_id):
         result = response.json() 
 
         if result:
-            requester = None
-            technician = None
+            requester = "None"
+            technician = "None"
 
             for user in result:
                 user_type = user.get('type')  
 
                 # (requester)
-                if user_type == "1" and requester is None:
+                if str(user_type) == "1" and requester == "None":
                     requester = user.get('users_id')
                 
                 # (technician)
-                if user_type == "2" and technician is None:
+                if str(user_type) == "2" and technician == "None":
                     technician = user.get('users_id')
 
                 if requester and technician:
@@ -198,7 +198,7 @@ def glpi_main(tik_aid_main, session_token):
                     if users_id_lastupdater=="None":
                         users_id_lastupdater = ticket_details.get('users_id_lastupdater')
                     
-                    if ass_technician_id in ["None", "8", "7", "2747", "2702", "2703", "2731", "2555", "2662", "3793"]:
+                    if str(ass_technician_id) in ["None", "8", "7", "2747", "2702", "2703", "2731", "2555", "2662", "3793"]:
                         try:
                             user_details = get_user_details(session_token, users_id_lastupdater)
                         except Exception as e:
