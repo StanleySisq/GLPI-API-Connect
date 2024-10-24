@@ -120,31 +120,29 @@ def send_ticket_closure_info(ticket_id, user_id):
     print("ticket closure sent")
 
 def get_assigned_users_from_ticket(session_token, ticket_id):
-    url = f"{settings.Glpi_Url}/search/Ticket_User"
 
-    params = {
-        "criteria[0][field]": "tickets_id",
-        "criteria[0][searchtype]": "equals",
-        "criteria[0][value]": ticket_id,
-        "forcedisplay[0]": "users_id",  
-        "forcedisplay[1]": "type"       
-    }
+    url = f"{settings.Glpi_Url}/Ticket/{ticket_id}/Ticket_User"
 
-    response = requests.get(url, headers=header(session_token), params=params)
+    response = requests.get(url, headers=header(session_token))
 
     if response.status_code == 200:
-        result = response.json()
+        result = response.json() 
 
-        if "data" in result and result["data"]:
+        if result:
             requester = None
-            technician = "None"
+            technician = None
 
-            for user in result["data"]:
-                if user.get("type") == "1" and not requester: 
+            for user in result:
+                user_type = user.get("type")  
+
+                # (requester)
+                if user_type == "1" and requester is None:
                     requester = user.get("users_id")
-                if user.get("type") == "2" and not technician:
-                    technician = user.get("users_id")
                 
+                # (technician)
+                if user_type == "2" and technician is None:
+                    technician = user.get("users_id")
+
                 if requester and technician:
                     break
             
@@ -213,7 +211,7 @@ def glpi_main(tik_aid_main, session_token):
                         add_or_update_ticket(latest_ticket_id, 1)
                         break
                     else:
-                        print("   No our ticket. Its already assigned!!")
+                        print("   Not our ticket. Its already assigned!!")
                 else:
                     print("No ticket details available.")
             else:
