@@ -123,7 +123,7 @@ def get_assigned_users_from_ticket(session_token, ticket_id):
     url = f"{settings.Glpi_Url}/search/Ticket_User"
 
     params = {
-        "criteria[0][field]": "tickets_id",
+        "criteria[0][field]": "item_ticket_id",
         "criteria[0][searchtype]": "equals",
         "criteria[0][value]": ticket_id,
         "forcedisplay[0]": "users_id",  
