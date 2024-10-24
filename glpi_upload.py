@@ -75,7 +75,7 @@ def get_user_id_and_unit_by_gid(session_token, gid):
 
         if result.get("data"):
             user_data = result["data"][0]
-            user_id = user_data.get("2")  # User I
+            user_id = user_data.get("2") 
             return user_id
         else:
             print(f"No user found with GID: {gid}")
@@ -85,9 +85,9 @@ def get_user_id_and_unit_by_gid(session_token, gid):
         print(response.text)
         return None
 
-def glpi_create_ticket(session_token, title, description, assigned_user_gid, assigned_technic_id, unit_id, close_after):
+def glpi_create_ticket(session_token, title, description, assigned_user_gid, assigned_technic_gid, unit_id, close_after):
     assigned_user_id = get_user_id_and_unit_by_gid(session_token, assigned_user_gid)
-    
+    assigned_technic_id = get_user_id_and_unit_by_gid(session_token, assigned_technic_gid)
     ticket_data = {
         "input": {
             "name": title,
@@ -117,6 +117,7 @@ def glpi_create_ticket(session_token, title, description, assigned_user_gid, ass
         except:
             print("Ticket created but failed to assign user")
         try:
+            assign_response = glpi_assign_user_to_ticket(session_token, ticket_id, 3793, 2)
             assign_response = glpi_assign_user_to_ticket(session_token, ticket_id, assigned_technic_id, 2)
             #print(f"Technician assigned successfully to ticket {ticket_id}.")
             if close_after == "Yes":

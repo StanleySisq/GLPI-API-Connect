@@ -119,6 +119,43 @@ def send_ticket_closure_info(ticket_id, user_id):
     response.raise_for_status()
     print("ticket closure sent")
 
+def get_assigned_users_from_ticket(session_token, ticket_id):
+    url = f"{settings.Glpi_Url}/search/Ticket_User"
+
+    params = {
+        "criteria[0][field]": "tickets_id",
+        "criteria[0][searchtype]": "equals",
+        "criteria[0][value]": ticket_id,
+        "forcedisplay[0]": "users_id",  
+        "forcedisplay[1]": "type"       
+    }
+
+    response = requests.get(url, headers=header(session_token), params=params)
+
+    if response.status_code == 200:
+        result = response.json()
+
+        if "data" in result and result["data"]:
+            requester = None
+            technician = None
+
+            for user in result["data"]:
+                if user.get("type") == "1" and not requester: 
+                    requester = user.get("users_id")
+                if user.get("type") == "2" and not technician:
+                    technician = user.get("users_id")
+                
+                if requester and technician:
+                    break
+            
+            return requester, technician
+        else:
+            print(f"No users found for ticket ID {ticket_id}.")
+            return None, None
+    else:
+        print(f"Error fetching assigned users: {response.status_code} - {response.text}")
+        return None, None
+
 def glpi_main(tik_aid_main, session_token):
     all_details = {}
     try:
