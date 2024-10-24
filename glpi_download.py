@@ -143,10 +143,8 @@ def get_assigned_users_from_ticket(session_token, ticket_id):
                 if str(user_type) == "2" and technician == "None":
                     technician = user.get('users_id')
 
-                if requester and technician:
-                    break
-            print(technician)
-            print(requester)
+            #print(technician)
+            #print(requester)
             return requester, technician
         else:
             print(f"No users found for ticket ID {ticket_id}.")
