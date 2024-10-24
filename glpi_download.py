@@ -192,9 +192,13 @@ def glpi_main(tik_aid_main, session_token):
                     break
                 
                 if ticket_details:
-                    users_id_lastupdater = ticket_details.get('users_id_lastupdater')
+                    try:
+                        users_id_lastupdater, ass_technician_id = get_assigned_users_from_ticket(session_token, latest_ticket_id)
+                    except Exception as e:
+                        print("No Requester")
+                        users_id_lastupdater = ticket_details.get('users_id_lastupdater')
                     
-                    if users_id_lastupdater:
+                    if ass_technician_id in [None, 8, 7, 2747, 2702, 2703, 2731, 2555, 2662, 3793]:
                         try:
                             user_details = get_user_details(session_token, users_id_lastupdater)
                         except Exception as e:
@@ -208,7 +212,7 @@ def glpi_main(tik_aid_main, session_token):
                         add_or_update_ticket(latest_ticket_id, 1)
                         break
                     else:
-                        print("No 'users_id_lastupdater' in ticket details.")
+                        print("   No our ticket. Its already assigned!!")
                 else:
                     print("No ticket details available.")
             else:
