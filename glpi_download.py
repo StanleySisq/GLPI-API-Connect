@@ -151,10 +151,10 @@ def get_assigned_users_from_ticket(session_token, ticket_id):
             return requester, technician
         else:
             print(f"No users found for ticket ID {ticket_id}.")
-            return None, None
+            return "None", "None"
     else:
         print(f"Error fetching assigned users: {response.status_code} - {response.text}")
-        return None, None
+        return "None", "None"
 
 def glpi_main(tik_aid_main, session_token):
     all_details = {}
@@ -196,8 +196,8 @@ def glpi_main(tik_aid_main, session_token):
                         users_id_lastupdater, ass_technician_id = get_assigned_users_from_ticket(session_token, latest_ticket_id)
                     except Exception as e:
                         print("No Requester")
+                    if users_id_lastupdater=="None":
                         users_id_lastupdater = ticket_details.get('users_id_lastupdater')
-                        ass_technician_id = "None"
                     
                     if ass_technician_id in ["None", 8, 7, 2747, 2702, 2703, 2731, 2555, 2662, 3793]:
                         try:
