@@ -133,15 +133,15 @@ def get_assigned_users_from_ticket(session_token, ticket_id):
             technician = None
 
             for user in result:
-                user_type = user.get("type")  
+                user_type = user.get('type')  
 
                 # (requester)
                 if user_type == "1" and requester is None:
-                    requester = user.get("users_id")
+                    requester = user.get('users_id')
                 
                 # (technician)
                 if user_type == "2" and technician is None:
-                    technician = user.get("users_id")
+                    technician = user.get('users_id')
 
                 if requester and technician:
                     break
