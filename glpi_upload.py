@@ -87,7 +87,7 @@ def get_user_id_and_unit_by_gid(session_token, gid):
 
 def glpi_create_ticket(session_token, title, description, assigned_user_gid, assigned_technic_gid, unit_id, close_after):
     assigned_user_id = get_user_id_and_unit_by_gid(session_token, assigned_user_gid)
-    assigned_technic_id = get_user_id_and_unit_by_gid(session_token, assigned_technic_gid)
+    assigned_technic_id = assigned_technic_gid #get_user_id_and_unit_by_gid(session_token, assigned_technic_gid)
     ticket_data = {
         "input": {
             "name": title,
@@ -118,14 +118,14 @@ def glpi_create_ticket(session_token, title, description, assigned_user_gid, ass
             print("Ticket created but failed to assign user")
         try:
             assign_response = glpi_assign_user_to_ticket(session_token, ticket_id, 3793, 2)
-            assign_response = glpi_assign_user_to_ticket(session_token, ticket_id, assigned_technic_id, 2)
+            assign_response2 = glpi_assign_user_to_ticket(session_token, ticket_id, assigned_technic_id, 2)
             #print(f"Technician assigned successfully to ticket {ticket_id}.")
             if close_after == "Yes":
                 response_close = glpi_close_ticket(session_token, ticket_id, description)
 
             return response.json()
         except Exception as e:
-            print( f"Ticket created but failed to assign technician: {str(e)}")
+            print( f"Ticket created but failed to assign technician and close: {str(e)}")
     else:
         print(f"Error creating ticket: {response.status_code} - {response.text}")
 
