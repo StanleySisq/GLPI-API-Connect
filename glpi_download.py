@@ -211,6 +211,7 @@ def glpi_main(tik_aid_main, session_token):
                         break
                     else:
                         print("   Not our ticket. Its already assigned!!")
+                        return
                 else:
                     print("No ticket details available.")
             else:
