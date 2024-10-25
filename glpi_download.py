@@ -62,7 +62,7 @@ def get_user_details(session_token, user_id):
         print(response.text)
         return None
 
-def merge_ticket_and_user_details(ticket_details, user_details):
+def merge_ticket_and_user_details(ticket_details, user_details, technic_id):
     clean = re.compile('<.*?>')
     merged_details = {
         'id': ticket_details.get('id'),
@@ -75,7 +75,8 @@ def merge_ticket_and_user_details(ticket_details, user_details):
         'surname': user_details.get('realname'),
         'firstname': user_details.get('firstname'),
         'phone': user_details.get('phone'),
-        'user_dn': user_details.get('user_dn')
+        'user_dn': user_details.get('user_dn'),
+        'technic_id': technic_id
     }
     return merged_details
 
@@ -135,11 +136,9 @@ def get_assigned_users_from_ticket(session_token, ticket_id):
             for user in result:
                 user_type = user.get('type')  
 
-                # (requester)
                 if str(user_type) == "1" and requester == "None":
                     requester = user.get('users_id')
                 
-                # (technician)
                 if str(user_type) == "2" and technician == "None":
                     technician = user.get('users_id')
 
@@ -192,18 +191,19 @@ def glpi_main(tik_aid_main, session_token):
                     try:
                         users_id_lastupdater, ass_technician_id = get_assigned_users_from_ticket(session_token, latest_ticket_id)
                     except Exception as e:
-                        print("No Requester")
+                        print("No Requester Eror")
                     if users_id_lastupdater=="None":
                         users_id_lastupdater = ticket_details.get('users_id_lastupdater')
                     
                     if str(ass_technician_id) in ["None", "8", "7", "2747", "2702", "2703", "2731", "2555", "2662", "3793"]:
+                        print(f"Our Technician ID {ass_technician_id}")
                         try:
                             user_details = get_user_details(session_token, users_id_lastupdater)
                         except Exception as e:
                             print(f"Error getting user details: {e}")
                             break
                         
-                        merged_details = merge_ticket_and_user_details(ticket_details, user_details)
+                        merged_details = merge_ticket_and_user_details(ticket_details, user_details, ass_technician_id)
                         all_details = merged_details
                         print("New ticket downloaded.")
                         
@@ -234,7 +234,13 @@ def glpi_main(tik_aid_main, session_token):
                             try:
                                 clean = re.compile('<.*?>')
                                 content_cleaned = re.sub(clean, ' ', html.unescape(followup["content"]))
-                                send_followup(content_cleaned, ticket_number, ticket_details["users_id_lastupdater"])
+                                try:
+                                    users_id_lastupdater, ass_technician_id = get_assigned_users_from_ticket(session_token, ticket_number)
+                                except Exception as e:
+                                    ass_technician_id = ticket_details["users_id_lastupdater"]
+                                    continue
+
+                                send_followup(content_cleaned, ticket_number, ass_technician_id)
                                 
                                 last_checked_id = followup_id
                                 add_or_update_ticket(ticket_number, last_checked_id)
@@ -246,7 +252,9 @@ def glpi_main(tik_aid_main, session_token):
                         if not is_ticket_open(session_token, ticket_number):
                             print(f"Ticket {ticket_number} is closed.")
                             ticket_details = get_ticket_details(session_token, ticket_number)
-                            users_id_lastupdater = ticket_details.get('users_id_lastupdater')
+                            requester, ass_technician_id = get_assigned_users_from_ticket(session_token, ticket_number)
+                            if( ass_technician_id == "None"):
+                                ass_technician_id = ticket_details.get('users_id_lastupdater')
                             send_ticket_closure_info(ticket_number, users_id_lastupdater)
                             remove_ticket(ticket_number, 4)
                     except Exception as e:
