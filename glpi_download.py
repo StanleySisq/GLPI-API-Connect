@@ -255,7 +255,7 @@ def glpi_main(tik_aid_main, session_token):
                             requester, ass_technician_id = get_assigned_users_from_ticket(session_token, ticket_number)
                             if( ass_technician_id == "None"):
                                 ass_technician_id = ticket_details.get('users_id_lastupdater')
-                            send_ticket_closure_info(ticket_number, users_id_lastupdater)
+                            send_ticket_closure_info(ticket_number, ass_technician_id)
                             remove_ticket(ticket_number, 4)
                     except Exception as e:
                         print(f"Error checking or closing ticket {ticket_number}: {e}")
