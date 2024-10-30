@@ -3,12 +3,16 @@ from glpi_download import header
 from data import remove_ticket, perform_deletions
 import settings
 
-def glpi_add_solution(ticket_id, solution_content, session_token):
+def glpi_add_solution(ticket_id, solution_content, session_token, technic_id):
     try:
         remove_ticket(ticket_id)
         perform_deletions()
     except Exception as e:
         print(f"SQL Error: {e}")
+    try:
+        respona = glpi_assign_user_to_ticket(session_token, ticket_id, technic_id, 2)
+    except Exception as e:
+        print(f"Cannot assign technic to ticket {ticket_id}, technic {technic_id}")    
 
     data = {
     "input": {
@@ -31,7 +35,7 @@ def glpi_add_followup(ticket_id, followup_content, session_token):
             "itemtype": "Ticket"  
         }
     }
-    response = requests.post(f"{settings.Glpi_Url}ITILFollowup/", headers=header(session_token), json=data)
+    response = requests.post(f"{settings.Glpi_Url}/ITILFollowup/", headers=header(session_token), json=data)
     response.raise_for_status()  # check HTTP
     return response.json()
 
@@ -50,7 +54,7 @@ def glpi_add_task_to_ticket(ticket_id, task_content, duration, session_token):
         }
     }
 
-    response = requests.post(f"{settings.Glpi_Url}TicketTask", headers=header(session_token), json=task_data)
+    response = requests.post(f"{settings.Glpi_Url}/TicketTask", headers=header(session_token), json=task_data)
 
     if response.status_code == 201:  
         return response.json()

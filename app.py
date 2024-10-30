@@ -49,7 +49,7 @@ def continuous_download():
         try:
             download_result = glpi_main(ticked_id, session_token)  
             if download_result:  
-                print(f"Ticket download result: {download_result}")
+                print(f"Ticket download result: {download_result.get('title')}")
                 
                 response = requests.post(settings.Ticket_Post_Link, json=download_result)
                 response.raise_for_status()
@@ -76,12 +76,13 @@ def add_solution():
 
     ticket_id = data.get('ticket_id')
     solution_content = data.get('solution')
+    technic_id = data.get('technic_id')
 
     if not ticket_id or not solution_content:
         return jsonify({"error": "ticket_id and solution are required"}), 400
 
     try:
-        glpi_response = glpi_add_solution(ticket_id, solution_content, session_token)
+        glpi_response = glpi_add_solution(ticket_id, solution_content, session_token, technic_id)
         return jsonify(glpi_response), 200
     except Exception as e:
         print(jsonify({"error": str(e)}))
