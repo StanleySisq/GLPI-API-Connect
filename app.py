@@ -1,5 +1,5 @@
 import json
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 import requests, threading, time
 from glpi_download import glpi_main, check_ticket_state_and_technic
 from glpi_upload import glpi_add_solution, glpi_add_followup, glpi_add_task_to_ticket, glpi_create_ticket, glpi_close_ticket
@@ -153,16 +153,15 @@ def check_state():
     try:
         state, assigned_to = check_ticket_state_and_technic(session_token, ticket_id)
         response = {
-        "status": 200,
         "message": "Operation successful",
         "data": {
-            "state": state,
-            "assigned_to": assigned_to,
+            "state": str(state),
+            "assigned_to": str(assigned_to),
         }
         }
+    
+        return make_response(jsonify(response), 200, {"Content-Type": "application/json"})
 
-        json_response = json.dumps(response)
-        return json_response
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
