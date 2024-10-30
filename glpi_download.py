@@ -157,7 +157,7 @@ def check_ticket_state_and_technic(session_token, ticket_id):
     state = "Open"
 
     if not is_ticket_open(session_token, ticket_id):
-        closed = "Closed"
+        state = "Closed"
     else:
         user, technic = get_assigned_users_from_ticket(session_token, ticket_id)
         if str(technic) in ["None", "8", "7", "2747", "2702", "2703", "2731", "2555", "2662", "3793"]:
