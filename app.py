@@ -1,6 +1,7 @@
+import json
 from flask import Flask, jsonify, request
 import requests, threading, time
-from glpi_download import glpi_main
+from glpi_download import glpi_main, check_ticket_state_and_technic
 from glpi_upload import glpi_add_solution, glpi_add_followup, glpi_add_task_to_ticket, glpi_create_ticket, glpi_close_ticket
 import settings
 
@@ -140,6 +141,28 @@ def add_ticket():
         glpi_response = glpi_create_ticket(session_token, title, description, assigned_user_id, assigned_technic_id, unit_id, close_after)
 
         return jsonify(glpi_response), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/check_state', methods=['POST'])
+def check_state():
+    data = request.json
+
+    ticket_id = data.get('ticket_id')
+
+    try:
+        state, assigned_to = check_ticket_state_and_technic(session_token, ticket_id)
+        response = {
+        "status": 200,
+        "message": "Operation successful",
+        "data": {
+            "state": state,
+            "assigned_to": assigned_to,
+        }
+        }
+
+        json_response = json.dumps(response)
+        return json_response
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

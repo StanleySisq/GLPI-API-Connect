@@ -152,6 +152,19 @@ def get_assigned_users_from_ticket(session_token, ticket_id):
         print(f"Error fetching assigned users: {response.status_code} - {response.text}")
         return "None", "None"
 
+def check_ticket_state_and_technic(session_token, ticket_id):
+    assigned_to = "Other"
+    state = "Open"
+
+    if not is_ticket_open(session_token, ticket_id):
+        closed = "Closed"
+    else:
+        user, technic = get_assigned_users_from_ticket(session_token, ticket_id)
+        if str(technic) in ["None", "8", "7", "2747", "2702", "2703", "2731", "2555", "2662", "3793"]:
+            assigned_to = str(technic)
+
+    return state, assigned_to
+
 def glpi_main(tik_aid_main, session_token):
     all_details = {}
     try:

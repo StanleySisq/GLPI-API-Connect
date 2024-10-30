@@ -10,6 +10,7 @@ def glpi_add_solution(ticket_id, solution_content, session_token, technic_id):
     except Exception as e:
         print(f"SQL Error: {e}")
     try:
+        respona = glpi_assign_user_to_ticket(session_token, ticket_id, 3793, 2)
         respona = glpi_assign_user_to_ticket(session_token, ticket_id, technic_id, 2)
     except Exception as e:
         print(f"Cannot assign technic to ticket {ticket_id}, technic {technic_id}")    

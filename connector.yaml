@@ -32,7 +32,7 @@ paths:
               description:
                 type: string
                 description: The description of the ticket
-                example: >-
+                example: 
                   The office printer is malfunctioning and won't print any
                   documents.
               assigned_user_id:
@@ -128,6 +128,10 @@ paths:
                 type: string
                 description: The content of the solution
                 example: This is the solution to the problem.
+              technic_id:
+                type: integer
+                description: The ID of the technic
+                example: 2737
       responses:
         '200':
           description: Solution added successfully
@@ -279,5 +283,65 @@ paths:
                 description: Error message
                 example: Internal server error
       operationId: Add_task
+  /check_state:
+    post:
+      summary: Check state of ticket and assigned technic
+      description: This endpoint allows you to Check state of ticket and assigned technic
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Ticket id
+          required: true
+          schema:
+            type: object
+            properties:
+              ticket_id:
+                type: integer
+                description: The id of ticket in glpi
+                example: 503
+      responses:
+        '200':
+          description: Status checked successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Confirmation message
+                example: Operation successful.
+              data:
+                type: object
+                properties:
+                  state:
+                    type: string
+                    description: Ticket Open or closed
+                    example: Open
+                  assigned_to:
+                    type: string
+                    description: Id of technic assigned to ticket
+                    example: Other
+        '400':
+          description: Invalid input
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error message
+                example: ticket id is required
+        '500':
+          description: Server error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error message
+                example: Internal server error
+      operationId: check_state
 securityDefinitions: {}
 basePath: /
