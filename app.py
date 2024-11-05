@@ -49,6 +49,10 @@ def continuous_download():
 
         try:
             download_result = glpi_main(ticked_id, session_token)  
+        except Exception as e:
+            print("Error while while downloading ticket (GLPI_download):")
+            print(f"Error: {str(e)}")
+        try:
             if download_result:  
                 print(f"Ticket download result: {download_result.get('title')}")
                 
@@ -62,7 +66,7 @@ def continuous_download():
                         file.write(str(latest_ticket_id))
                     print(f"Updated latest ticket ID to {latest_ticket_id}")
         except Exception as e:
-            print("Error while downloading or sending the ticket:")
+            print(f"Error while downloading or sending the ticket (app): {download_result} || ")
             print(f"Error: {str(e)}")
        
         time.sleep(5) 
