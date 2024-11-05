@@ -76,7 +76,7 @@ def merge_ticket_and_user_details(ticket_details, user_details, technic_id):
         'firstname': user_details.get('firstname'),
         'phone': user_details.get('phone'),
         'user_dn': user_details.get('user_dn'),
-        'technic_id': technic_id
+        'technic_id': str(technic_id)
     }
     return merged_details
 
@@ -209,7 +209,7 @@ def glpi_main(tik_aid_main, session_token):
                         users_id_lastupdater = ticket_details.get('users_id_lastupdater')
                     
                     if str(ass_technician_id) in ["None", "8", "7", "2747", "2702", "2703", "2731", "2555", "2662", "3793"]:
-                        print(f"Our Technician ID {ass_technician_id}")
+                        print(f"Download: Our Technician ID {ass_technician_id}")
                         try:
                             user_details = get_user_details(session_token, users_id_lastupdater)
                         except Exception as e:
