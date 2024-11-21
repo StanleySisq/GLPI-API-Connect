@@ -250,7 +250,7 @@ def glpi_main(tik_aid_main, session_token):
                     
                     data = {
                         "title": str(all_details.get('title')),
-                        "contact": str(all_details.get('firstname'))+" "+str(all_details.get('surname')), 
+                        "contact": str(all_details.get('firstname')+" "+all_details.get('surname')), 
                         "client": str(entities_map.get(all_details.get('entities_id'))),
                         "gid": str(all_details.get('gid'))
                     }
@@ -284,6 +284,7 @@ def glpi_main(tik_aid_main, session_token):
                         prev_last_modified =  datetime.strptime(prev_last_modified, date_format) 
                     except Exception as e:
                         print(f"Error while get last modified: {e}")
+                        continue
                     if prev_last_modified < last_modified_data: 
                         #REPAIR - same thing in main and here (dwnld all_details)
 
@@ -307,7 +308,7 @@ def glpi_main(tik_aid_main, session_token):
                         
                         update_data = {
                                     'title':str(all_details.get('title')),
-                                    'contact': str(all_details.get('firstname'))+" "+str(all_details.get('surname')),
+                                    'contact': str(all_details.get('firstname')+" "+all_details.get('surname')),
                                     'client':str(entities_map.get(all_details.get('entities_id'))),
                                     'gid': str(all_details.get('gid')),
                                     'visible': '',
