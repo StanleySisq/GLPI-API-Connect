@@ -1,5 +1,5 @@
 #import json
-import datetime
+from datetime import datetime
 from time import sleep
 import requests, html, re
 from data import  add_or_update_ticket, load_tickets, remove_ticket, load_local_viewer_id
@@ -231,7 +231,7 @@ def glpi_main(tik_aid_main, session_token):
                         print("No Requester Eror")
                     if users_id_lastupdater=="None":
                         users_id_lastupdater = ticket_details.get('users_id_lastupdater')
-                        
+
                     last_modified = ticket_details.get('date_mod')
                     
                     print(f"Download: Technician ID {ass_technician_id}")
@@ -250,7 +250,7 @@ def glpi_main(tik_aid_main, session_token):
                     
                     data = {
                         "title": str(all_details.get('title')),
-                        "contact": str(all_details.get('firstname')+all_details.get('surname')), 
+                        "contact": str(all_details.get('firstname')+" "+all_details.get('surname')), 
                         "client": str(entities_map.get(all_details.get('entities_id'))),
                         "gid": str(all_details.get('gid'))
                     }
@@ -272,6 +272,7 @@ def glpi_main(tik_aid_main, session_token):
                 for ticket in tickets:
                     
                     ticket_number, last_checked_id, prev_last_modified = ticket
+                    last_modified_data = prev_last_modified
                     try:
                         date_format = "%Y-%m-%d %H:%M:%S"
                         last_modified = get_ticket_details(session_token, ticket_number).get('date_mod')
@@ -288,7 +289,7 @@ def glpi_main(tik_aid_main, session_token):
                         
                         update_data = {
                                     'title':str(load.get('title')),
-                                    'contact': str(load.get('firstname')+load.get('surname')),
+                                    'contact': str(load.get('firstname')+" "+load.get('surname')),
                                     'client':str(entities_map.get(load.get('entities_id'))),
                                     'gid': str(load.get('gid')),
                                     'visible': '',

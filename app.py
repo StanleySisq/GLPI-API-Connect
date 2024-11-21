@@ -60,7 +60,8 @@ def continuous_download():
                 
                 response = requests.post(settings.Ticket_Local_Viewer_Link, json=download_result)
                 response.raise_for_status()
-                local_viewer_id = response.get('ticket_id')
+                data_respa = response.json()
+                local_viewer_id = data_respa.get('ticket_id')
                 print("New ticket sent successfully.")
 
                 latest_ticket_id = download_result.get('id')
@@ -81,7 +82,7 @@ def continuous_download():
                                     'migacz':'False'
                                 }
                     response = requests.post(updata_link, json=update_data)
-                    
+
         except Exception as e:
             print(f"Error while downloading or sending the ticket (app): {download_result} || ")
             print(f"Error: {str(e)}")
