@@ -224,13 +224,15 @@ def glpi_main(tik_aid_main, session_token):
                     break
                 
                 if ticket_details:
+                    
                     try:
                         users_id_lastupdater, ass_technician_id = get_assigned_users_from_ticket(session_token, latest_ticket_id)
                     except Exception as e:
                         print("No Requester Eror")
                     if users_id_lastupdater=="None":
                         users_id_lastupdater = ticket_details.get('users_id_lastupdater')
-                        last_modified = ticket_details.get('date_mod')
+                        
+                    last_modified = ticket_details.get('date_mod')
                     
                     print(f"Download: Technician ID {ass_technician_id}")
                     try:
