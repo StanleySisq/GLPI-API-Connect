@@ -53,10 +53,14 @@ def add_local_viewer_id_ticket(ticket_number, local_viewer_id):
 
 def load_local_viewer_id(ticket_number):
     conn, cursor = init_database()
-    cursor.execute('''SELECT local_viewer_id FROM tickets WHERE ticket_number = ?''', (ticket_number,))  # Zmień na `(ticket_number,)`
-    reta = cursor.fetchall()
+    cursor.execute('''SELECT local_viewer_id FROM tickets WHERE ticket_number = ?''', (ticket_number,))
+    reta = cursor.fetchone()  
     conn.close()
-    return reta
+    
+    if reta:  
+        return reta[0]  
+    else:
+        return None  
 
 def load_tickets():
     conn, cursor = init_database()
