@@ -73,7 +73,7 @@ def continuous_download():
                         file.write(str(latest_ticket_id))
                     print(f"Updated latest ticket ID to {latest_ticket_id}")
                 if hide_ticket:
-                    updata_link = settings.Ticket_Local_Viewer_Link + "/" + local_viewer_id
+                    updata_link = settings.Ticket_Local_Viewer_Link + f"/{local_viewer_id}"
                     update_data = {
                                     'title':'',
                                     'contact':'',
