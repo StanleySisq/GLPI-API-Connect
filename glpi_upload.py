@@ -3,6 +3,8 @@ from glpi_download import header
 from data import remove_ticket, perform_deletions
 import settings
 
+#ADD CHANGE OR STH IN GLPI
+
 def glpi_add_solution(ticket_id, solution_content, session_token, technic_id):
     try:
         remove_ticket(ticket_id)
@@ -150,6 +152,37 @@ def glpi_assign_user_to_ticket(session_token, ticket_id, user_id, type):
         return response.json()
     else:
         print(f"Error assigning technician: {response.status_code} - {response.text}")
+
+def glpi_unassign_user_from_ticket(session_token, ticket_id, user_id):
+    
+    url = f"{settings.Glpi_Url}/Ticket/{ticket_id}/Ticket_User"
+    response = requests.get(url, headers=header(session_token))
+
+    if response.status_code != 200:
+        print(f"Error fetching Ticket_User associations: {response.status_code} - {response.text}")
+        response.raise_for_status()
+
+    ticket_users = response.json()
+
+    ticket_user_id = None
+    for association in ticket_users:
+        if association.get("users_id") == user_id:
+            ticket_user_id = association.get("id")
+            break
+
+    if not ticket_user_id:
+        print(f"No association found for user {user_id} in ticket {ticket_id}.")
+        return None
+
+    delete_url = f"{settings.Glpi_Url}/Ticket_User/{ticket_user_id}"
+    delete_response = requests.delete(delete_url, headers=header(session_token))
+
+    if delete_response.status_code == 200:
+        print(f"User {user_id} successfully unassigned from ticket {ticket_id}.")
+        return delete_response.json()
+    else:
+        print(f"Error unassigning user: {delete_response.status_code} - {delete_response.text}")
+        delete_response.raise_for_status()
 
 def glpi_close_ticket(session_token, ticket_id, content):
 

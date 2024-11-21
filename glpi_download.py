@@ -1,9 +1,12 @@
 #import json
+import datetime
 from time import sleep
 import requests, html, re
-from data import  add_or_update_ticket, load_tickets, remove_ticket
+from data import  add_or_update_ticket, load_tickets, remove_ticket, load_local_viewer_id
 import settings
+from glpi_upload import glpi_unassign_user_from_ticket, glpi_close_ticket
 
+#DOWNLOAD FROM GLPI
     
 def header(session_token):
     headers = {
@@ -80,12 +83,14 @@ def merge_ticket_and_user_details(ticket_details, user_details, technic_id):
     }
     return merged_details
 
+#Not used
 def get_followups(ticket_id, session_token):
     url = f"{settings.Glpi_Url}/Ticket/{ticket_id}/ITILFollowup/"
     response = requests.get(url, headers=header(session_token))
     response.raise_for_status()
     return response.json()
 
+#Not used
 def send_followup(followup_content, ticket_id, owner_id):
     payload = {"content": followup_content,
                "ticket_id": ticket_id,
@@ -102,13 +107,13 @@ def is_ticket_open(session_token, ticket_id):
         ticket_details = response.json()
         status = ticket_details.get('status')
         
-        return status in [1, 2] 
+        return status in [1, 2], status 
     else:
         print(f"Error checking ticket status: {response.status_code}")
         print(response.text)
         return False
 
-
+#Not used
 def send_ticket_closure_info(ticket_id, user_id):
     payload = {
         "ticket_id": str(ticket_id),
@@ -156,7 +161,9 @@ def check_ticket_state_and_technic(session_token, ticket_id):
     assigned_to = "Other"
     state = "Open"
 
-    if not is_ticket_open(session_token, ticket_id):
+    is_it, state_num = is_ticket_open(session_token, ticket_id)
+
+    if not is_it:
         state = "Closed"
     else:
         user, technic = get_assigned_users_from_ticket(session_token, ticket_id)
@@ -165,17 +172,38 @@ def check_ticket_state_and_technic(session_token, ticket_id):
 
     return state, assigned_to
 
+def is_ticket_source_xxx(session_token, ticket_id):
+
+    try:
+        ticket_details = get_ticket_details(session_token, ticket_id)
+        if not ticket_details:
+            print(f"Ticket {ticket_id} not found.")
+            return False
+
+        request_type_id = ticket_details.get('requesttypes_id')
+        if request_type_id == 9:
+            print(f"Ticket {ticket_id} source is 'xxx'.")
+            return True
+        else:
+            #print(f"Ticket {ticket_id} source is not 'xxx'. RequestType ID is {request_type_id}.")
+            return False  
+
+    except Exception as e:
+        print(f"Error while checking ticket source: {e}")
+        return False
+
 def glpi_main(tik_aid_main, session_token):
     all_details = {}
     try:
         tik_aid = tik_aid_main
+        entities_map = settings.entities_names
 
         while True:
             sleeper = settings.Check_Time
             if not session_token:
                 print("Session token is invalid or missing.")
                 break
-            
+            #Find if new ticket and send out
             try:
                 latest_ticket_id = search_latest_ticket(session_token, str(int(tik_aid) + 5))
             except Exception as e:
@@ -207,77 +235,182 @@ def glpi_main(tik_aid_main, session_token):
                         print("No Requester Eror")
                     if users_id_lastupdater=="None":
                         users_id_lastupdater = ticket_details.get('users_id_lastupdater')
+                        last_modified = ticket_details.get('date_mod')
                     
-                    if str(ass_technician_id) in ["None", "8", "7", "2747", "2702", "2703", "2731", "2555", "2662", "3793"]:
-                        print(f"Download: Our Technician ID {ass_technician_id}")
-                        try:
-                            user_details = get_user_details(session_token, users_id_lastupdater)
-                        except Exception as e:
-                            print(f"Error getting user details: {e}")
-                            break
-                        
-                        merged_details = merge_ticket_and_user_details(ticket_details, user_details, ass_technician_id)
-                        all_details = merged_details
-                        print("New ticket downloaded.")
-                        
-                        add_or_update_ticket(latest_ticket_id, 1)
+                    print(f"Download: Technician ID {ass_technician_id}")
+                    try:
+                        user_details = get_user_details(session_token, users_id_lastupdater)
+                    except Exception as e:
+                        print(f"Error getting user details: {e}")
                         break
-                    else:
-                        print("   Not our ticket. Its already assigned!!")
-                        return
+                        
+                    merged_details = merge_ticket_and_user_details(ticket_details, user_details, ass_technician_id)
+                    all_details = merged_details
+                    print("New ticket downloaded.")
+                        
+                    add_or_update_ticket(latest_ticket_id, 1, last_modified)
+
+                    
+                    data = {
+                        "title": str(all_details.get('title')),
+                        "contact": str(all_details.get('firstname')+all_details.get('surname')), 
+                        "client": str(entities_map.get(all_details.get('entities_id'))),
+                        "gid": str(all_details.get('gid'))
+                    }
+                    hide_ticket = True
+                    if str(ass_technician_id) in ["None", "8", "7", "2747", "2702", "2703", "2731", "2555", "2662", "3793"]:
+                        hide_ticket = False
+                        
+                    return data, hide_ticket
+                    
                 else:
                     print("No ticket details available.")
             else:
                 sleeper = 3  
 
+            
             tickets = load_tickets()
             
             if tickets:
                 for ticket in tickets:
-                    ticket_number, last_checked_id = ticket
-                    try:
-                        followups = get_followups(ticket_number, session_token)
-                    except Exception as e:
-                        print(f"Error getting follow-ups for ticket {ticket_number}: {e}")
-                        continue 
                     
-                    for followup in followups:
-                        followup_id = int(followup["id"])
-                        
-                        if followup_id > last_checked_id:
-                            try:
-                                clean = re.compile('<.*?>')
-                                content_cleaned = re.sub(clean, ' ', html.unescape(followup["content"]))
-                                try:
-                                    users_id_lastupdater, ass_technician_id = get_assigned_users_from_ticket(session_token, ticket_number)
-                                except Exception as e:
-                                    ass_technician_id = ticket_details["users_id_lastupdater"]
-                                    continue
-
-                                send_followup(content_cleaned, ticket_number, ass_technician_id)
-                                
-                                last_checked_id = followup_id
-                                add_or_update_ticket(ticket_number, last_checked_id)
-                            except Exception as e:
-                                print(f"Error sending follow-up for ticket {ticket_number}: {e}")
-                                continue 
-
+                    ticket_number, last_checked_id, prev_last_modified = ticket
                     try:
-                        if not is_ticket_open(session_token, ticket_number):
-                            print(f"Ticket {ticket_number} is closed.")
-                            ticket_details = get_ticket_details(session_token, ticket_number)
-                            requester, ass_technician_id = get_assigned_users_from_ticket(session_token, ticket_number)
-                            if( ass_technician_id == "None"):
-                                ass_technician_id = ticket_details.get('users_id_lastupdater')
-                            send_ticket_closure_info(ticket_number, ass_technician_id)
-                            remove_ticket(ticket_number, 4)
+                        date_format = "%Y-%m-%d %H:%M:%S"
+                        last_modified = get_ticket_details(session_token, ticket_number).get('date_mod')
+                        last_modified_data =  datetime.strptime(last_modified, date_format)
+                        prev_last_modified =  datetime.strptime(prev_last_modified, date_format) #TTTESSSTTTT_______________________________________________________________
                     except Exception as e:
-                        print(f"Error checking or closing ticket {ticket_number}: {e}")
-                        continue
+                        print(f"Error while get last modified: {e}")
+                    if prev_last_modified < last_modified_data: 
+
+                        load = load_local_viewer_id(ticket_number)
+                        
+                        local_viewer_id = load.get('local_viewer_id')
+                        updata_link = settings.Ticket_Local_Viewer_Link + "/" + local_viewer_id
+                        
+                        update_data = {
+                                    'title':str(load.get('title')),
+                                    'contact': str(load.get('firstname')+load.get('surname')),
+                                    'client':str(entities_map.get(load.get('entities_id'))),
+                                    'gid': str(load.get('gid')),
+                                    'visible': '',
+                                    'migacz':''
+                                }
+
+                        response = requests.post(updata_link, json=update_data) # TTTEEESSSTTT___________________________________________________________________
+
+                        state, assigned_to = add_or_update_ticket(ticket_number, 1, last_modified)
+                                        
+
+                        """
+                        #Send outside new followups in observed tickets / off ?
+                        try:
+                            followups = get_followups(ticket_number, session_token)  
+                        except Exception as e:
+                            print(f"Error getting follow-ups for ticket {ticket_number}: {e}")
+                            continue 
+                        
+                        for followup in followups:
+                            followup_id = int(followup["id"])
+                            
+                            if followup_id > last_checked_id:
+                                try:
+                                    clean = re.compile('<.*?>')
+                                    content_cleaned = re.sub(clean, ' ', html.unescape(followup["content"]))
+                                    try:
+                                        users_id_lastupdater, ass_technician_id = get_assigned_users_from_ticket(session_token, ticket_number)
+                                    except Exception as e:
+                                        ass_technician_id = ticket_details["users_id_lastupdater"]
+                                        continue
+
+                                    send_followup(content_cleaned, ticket_number, ass_technician_id)
+                                    
+                                    last_checked_id = followup_id
+                                    add_or_update_ticket(ticket_number, last_checked_id)
+                                except Exception as e:
+                                    print(f"Error sending follow-up for ticket {ticket_number}: {e}")
+                                    continue """
+
+                        #Send info if ticked closed in GLPI  
+                        try:
+                            state, assigned_to = check_ticket_state_and_technic(session_token, ticket_number)
+                            if state == "Closed" or assigned_to == "Other":
+                                print(f"Ticket {ticket_number} is closed/in progres/Other user.")
+                                """
+                                ticket_details = get_ticket_details(session_token, ticket_number)
+                                requester, ass_technician_id = get_assigned_users_from_ticket(session_token, ticket_number)
+                                if( ass_technician_id == "None"):
+                                    ass_technician_id = ticket_details.get('users_id_lastupdater')
+                                send_ticket_closure_info(ticket_number, ass_technician_id)
+                                """
+                                
+                                update_data = {
+                                    'title':'',
+                                    'contact':'',
+                                    'client':'',
+                                    'gid':'',
+                                    'visible': 'False',
+                                    'migacz':''
+                                }
+                                
+                                response = requests.post(updata_link, json=update_data)
+
+                                is_it, state_num = is_ticket_open(session_token, ticket_number)
+                                
+                                if state_num > 4:
+                                    remove_ticket(ticket_number, 72)
+
+                            elif assigned_to != "Other":
+                                update_data = {
+                                    'title':'',
+                                    'contact':'',
+                                    'client':'',
+                                    'gid':'',
+                                    'visible': 'True',
+                                    'migacz':''
+                                }
+
+                                response = requests.post(updata_link, json=update_data)
+                                
+                        except Exception as e:
+                            print(f"Error checking or closing ticket {ticket_number}: {e}")
+                            continue
+ 
+
+                        #Send ticket outside if xxx source selected
+                        try:
+                            if is_ticket_source_xxx(session_token, ticket_number):
+
+                                ticket_details = get_ticket_details(session_token, ticket_number)
+                                requester_id, technician_id = get_assigned_users_from_ticket(session_token, ticket_number)
+                                user_details = get_user_details(session_token, requester_id)
+                                all_info = merge_ticket_and_user_details(ticket_details, user_details, technician_id)
+
+                                try: 
+                                    response = glpi_unassign_user_from_ticket(session_token, ticket_number, requester_id) #TTTEEESSSTTT___________________________
+                                    response = glpi_close_ticket(session_token, ticket_number, "Ticket Forwarded")
+                                except Exception as e:
+                                    print(f"Error occured: unassign/close ticket: {response}")
+
+                                try:
+                                    if all_info:  
+                                        print(f"Ticket download result: {all_info.get('title')}")
+                                        
+                                        response = requests.post(settings.Ticket_Post_Link, json=all_info)
+                                        response.raise_for_status()
+                                        print("New ticket sent successfully.")
+
+                                except Exception as e:
+                                    print(f"Error while downloading or sending the ticket (): {all_info} || ")
+                                    print(f"Error: {str(e)}")
+                                
+                        except Exception as e:
+                            print(f"Error checking requestype of ticket {ticket_number}: {e}")
 
             sleep(sleeper)
 
     except Exception as e:
         print(f"Main GLPI Connector ERROR: {e}")
 
-    return all_details
+    return all_details, False

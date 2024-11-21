@@ -4,6 +4,7 @@ import requests, threading, time
 from glpi_download import glpi_main, check_ticket_state_and_technic
 from glpi_upload import glpi_add_solution, glpi_add_followup, glpi_add_task_to_ticket, glpi_create_ticket, glpi_close_ticket
 import settings
+from data import add_local_viewer_id_ticket, perform_deletions
 
 app = Flask(__name__)
 
@@ -32,6 +33,7 @@ def refresh_sesion():
     while True:
         try:
             session_token = init_session()
+            perform_deletions()
         except:
             print("Error sesion refresh")
         time.sleep(180000)
@@ -48,7 +50,7 @@ def continuous_download():
                 file.write(ticked_id)
 
         try:
-            download_result = glpi_main(ticked_id, session_token)  
+            download_result, hide_ticket = glpi_main(ticked_id, session_token)  
         except Exception as e:
             print("Error while while downloading ticket (GLPI_download):")
             print(f"Error: {str(e)}")
@@ -56,15 +58,30 @@ def continuous_download():
             if download_result:  
                 print(f"Ticket download result: {download_result.get('title')}")
                 
-                response = requests.post(settings.Ticket_Post_Link, json=download_result)
+                response = requests.post(settings.Ticket_Local_Viewer_Link, json=download_result)
                 response.raise_for_status()
+                local_viewer_id = response.get('ticket_id')
                 print("New ticket sent successfully.")
 
                 latest_ticket_id = download_result.get('id')
+                add_local_viewer_id_ticket(latest_ticket_id, local_viewer_id)
+
                 if latest_ticket_id:
                     with open(settings.Id_File, "w") as file:
                         file.write(str(latest_ticket_id))
                     print(f"Updated latest ticket ID to {latest_ticket_id}")
+                if hide_ticket:
+                    updata_link = settings.Ticket_Local_Viewer_Link + "/" + local_viewer_id
+                    update_data = {
+                                    'title':'',
+                                    'contact':'',
+                                    'client':'',
+                                    'gid':'',
+                                    'visible': 'False',
+                                    'migacz':'False'
+                                }
+                    response = requests.post(updata_link, json=update_data)
+                    
         except Exception as e:
             print(f"Error while downloading or sending the ticket (app): {download_result} || ")
             print(f"Error: {str(e)}")
