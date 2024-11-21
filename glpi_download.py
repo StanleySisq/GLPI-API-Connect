@@ -275,23 +275,38 @@ def glpi_main(tik_aid_main, session_token):
                     last_modified_data = prev_last_modified
                     try:
                         date_format = "%Y-%m-%d %H:%M:%S"
-                        last_modified = get_ticket_details(session_token, ticket_number).get('date_mod')
+                        tick_details = get_ticket_details(session_token, ticket_number)
+                        last_modified = tick_details.get('date_mod')
                         last_modified_data =  datetime.strptime(last_modified, date_format)
-                        prev_last_modified =  datetime.strptime(prev_last_modified, date_format) #TTTESSSTTTT_______________________________________________________________
+                        prev_last_modified =  datetime.strptime(prev_last_modified, date_format) 
                     except Exception as e:
                         print(f"Error while get last modified: {e}")
                     if prev_last_modified < last_modified_data: 
+                        #REPAIR - same thing in main and here (dwnld all_details)
 
-                        load = load_local_viewer_id(ticket_number)
+                        load, local_viewer_id = load_local_viewer_id(ticket_number)
+                        try:
+                            users_id_lastupdater, ass_technician_id = get_assigned_users_from_ticket(session_token, latest_ticket_id)
+                        except Exception as e:
+                            print("No Requester Eror")
+                        if users_id_lastupdater=="None":
+                            users_id_lastupdater = tick_details.get('users_id_lastupdater')
+                        try:
+                            user_details = get_user_details(session_token, users_id_lastupdater)
+                        except Exception as e:
+                            print(f"Error getting user details: {e}")
+                            break
                         
-                        local_viewer_id = load.get('local_viewer_id')
+                        all_details = merge_ticket_and_user_details(tick_details, user_details, ass_technician_id)
+
+                        
                         updata_link = settings.Ticket_Local_Viewer_Link + "/" + local_viewer_id
                         
                         update_data = {
-                                    'title':str(load.get('title')),
-                                    'contact': str(load.get('firstname')+" "+load.get('surname')),
-                                    'client':str(entities_map.get(load.get('entities_id'))),
-                                    'gid': str(load.get('gid')),
+                                    'title':str(all_details.get('title')),
+                                    'contact': str(all_details.get('firstname')+" "+all_details.get('surname')),
+                                    'client':str(entities_map.get(all_details.get('entities_id'))),
+                                    'gid': str(all_details.get('gid')),
                                     'visible': '',
                                     'migacz':''
                                 }
