@@ -250,7 +250,7 @@ def glpi_main(tik_aid_main, session_token):
                     
                     data = {
                         "title": str(all_details.get('title')),
-                        "contact": str(all_details.get('firstname')+" "+all_details.get('surname')), 
+                        "contact": str(all_details.get('firstname'))+" "+str(all_details.get('surname')), 
                         "client": str(entities_map.get(all_details.get('entities_id'))),
                         "gid": str(all_details.get('gid'))
                     }
@@ -303,11 +303,11 @@ def glpi_main(tik_aid_main, session_token):
                         all_details = merge_ticket_and_user_details(tick_details, user_details, ass_technician_id)
 
                         
-                        updata_link = settings.Ticket_Local_Viewer_Link + "/" + local_viewer_id
+                        updata_link = settings.Ticket_Local_Viewer_Link + "/" + str(local_viewer_id)
                         
                         update_data = {
                                     'title':str(all_details.get('title')),
-                                    'contact': str(all_details.get('firstname')+" "+all_details.get('surname')),
+                                    'contact': str(all_details.get('firstname'))+" "+str(all_details.get('surname')),
                                     'client':str(entities_map.get(all_details.get('entities_id'))),
                                     'gid': str(all_details.get('gid')),
                                     'visible': '',
