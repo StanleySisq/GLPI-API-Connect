@@ -50,7 +50,7 @@ def continuous_download():
                 file.write(ticked_id)
 
         try:
-            download_result, hide_ticket = glpi_main(ticked_id, session_token)  
+            download_result, hide_ticket, latest_ticket_id = glpi_main(ticked_id, session_token)  
         except Exception as e:
             print("Error while while downloading ticket (GLPI_download):")
             print(f"Error: {str(e)}")
@@ -64,7 +64,7 @@ def continuous_download():
                 local_viewer_id = data_respa.get('ticket_id')
                 print("New ticket sent successfully.")
 
-                latest_ticket_id = download_result.get('id')
+                #latest_ticket_id = download_result.get('id')
                 add_local_viewer_id_ticket(latest_ticket_id, local_viewer_id)
 
                 if latest_ticket_id:

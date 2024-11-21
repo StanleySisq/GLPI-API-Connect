@@ -258,7 +258,7 @@ def glpi_main(tik_aid_main, session_token):
                     if str(ass_technician_id) in ["None", "8", "7", "2747", "2702", "2703", "2731", "2555", "2662", "3793"]:
                         hide_ticket = False
                         
-                    return data, hide_ticket
+                    return data, hide_ticket, latest_ticket_id
                     
                 else:
                     print("No ticket details available.")
@@ -298,7 +298,7 @@ def glpi_main(tik_aid_main, session_token):
 
                         response = requests.post(updata_link, json=update_data) # TTTEEESSSTTT___________________________________________________________________
 
-                        state, assigned_to = add_or_update_ticket(ticket_number, 1, last_modified)
+                        add_or_update_ticket(ticket_number, 1, last_modified)
                                         
 
                         """
