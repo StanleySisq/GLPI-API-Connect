@@ -97,7 +97,7 @@ def send_followup(followup_content, ticket_id, owner_id):
 
 def is_ticket_open(session_token, ticket_id):  
     response = requests.get(f"{settings.Glpi_Url}/Ticket/{ticket_id}", headers=header(session_token))
-    
+    status = 6
     if response.status_code == 200:
         ticket_details = response.json()
         status = ticket_details.get('status')
@@ -106,7 +106,7 @@ def is_ticket_open(session_token, ticket_id):
     else:
         print(f"Error checking ticket status: {response.status_code}")
         print(response.text)
-        return False
+        return False, status
 
 #Not used
 def send_ticket_closure_info(ticket_id, user_id):
@@ -399,8 +399,14 @@ def glpi_main(tik_aid_main, session_token):
                             if is_ticket_source_xxx(session_token, ticket_number):
 
                                 ticket_details = get_ticket_details(session_token, ticket_number)
-                                requester_id, technician_id = get_assigned_users_from_ticket(session_token, ticket_number)
-                                user_details = get_user_details(session_token, requester_id)
+                                try:
+                                    requester_id, technician_id = get_assigned_users_from_ticket(session_token, ticket_number)
+                                    user_details = get_user_details(session_token, requester_id)
+                                except Exception as e:
+                                    print("Error getting users details(is source xxx)")
+                                    user_details = get_user_details(session_token, 2662)
+                                    technician_id = 2662
+                                
                                 all_info = merge_ticket_and_user_details(ticket_details, user_details, technician_id)
 
                                 try: 
