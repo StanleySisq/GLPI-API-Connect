@@ -82,7 +82,7 @@ def continuous_download():
                                     'visible': 'False',
                                     'migacz':'False'
                                 }
-                    response = requests.post(updata_link, json=update_data)
+                    response = requests.put(updata_link, json=update_data)
 
         except Exception as e:
             print(f"Error while downloading or sending the ticket (app): {download_result} || ")
