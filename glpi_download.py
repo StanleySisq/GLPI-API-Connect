@@ -411,4 +411,4 @@ def glpi_main(tik_aid_main, session_token):
     except Exception as e:
         print(f"Main GLPI Connector ERROR: {e}")
 
-    return all_details, False
+    return all_details, False, 1
