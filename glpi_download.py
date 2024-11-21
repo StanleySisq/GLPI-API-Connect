@@ -271,7 +271,10 @@ def glpi_main(tik_aid_main, session_token):
             if tickets:
                 for ticket in tickets:
                     
-                    ticket_number, last_checked_id, prev_last_modified = ticket
+                    ticket_number, prev_last_modified = ticket
+                    if len(ticket) < 2:
+                        print(f"Skipping ticket due to missing data: {ticket}")
+                        continue  
                     last_modified_data = prev_last_modified
                     try:
                         date_format = "%Y-%m-%d %H:%M:%S"

@@ -60,7 +60,7 @@ def load_local_viewer_id(ticket_number):
 
 def load_tickets():
     conn, cursor = init_database()
-    cursor.execute('SELECT ticket_number, last_checked_id, last_modified FROM tickets WHERE delete_time IS NULL')
+    cursor.execute('SELECT ticket_number, last_modified FROM tickets WHERE delete_time IS NULL')
     reta = cursor.fetchall()
     conn.close()
     return reta
