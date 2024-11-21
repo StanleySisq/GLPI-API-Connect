@@ -287,7 +287,7 @@ def glpi_main(tik_aid_main, session_token):
                         last_modified_data =  datetime.strptime(last_modified, date_format)
                         prev_last_modified =  datetime.strptime(prev_last_modified, date_format) 
                     except Exception as e:
-                        print(f"Error while get last modified: {e}")
+                        print("Error while get last modified: ")
                         continue
                     if prev_last_modified < last_modified_data: 
                         #REPAIR - same thing in main and here (dwnld all_details)
@@ -302,7 +302,7 @@ def glpi_main(tik_aid_main, session_token):
                         try:
                             user_details = get_user_details(session_token, users_id_lastupdater)
                         except Exception as e:
-                            print(f"Error getting user details: {e}")
+                            print("Error getting user details: ")
                             break
                         
                         all_details = merge_ticket_and_user_details(tick_details, user_details, ass_technician_id)
