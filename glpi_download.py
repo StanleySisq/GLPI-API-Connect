@@ -287,7 +287,7 @@ def glpi_main(tik_aid_main, session_token):
                     if prev_last_modified < last_modified_data: 
                         #REPAIR - same thing in main and here (dwnld all_details)
 
-                        load, local_viewer_id = load_local_viewer_id(ticket_number)
+                        local_viewer_id = load_local_viewer_id(ticket_number)
                         try:
                             users_id_lastupdater, ass_technician_id = get_assigned_users_from_ticket(session_token, latest_ticket_id)
                         except Exception as e:
@@ -314,8 +314,7 @@ def glpi_main(tik_aid_main, session_token):
                                     'migacz':''
                                 }
 
-                        response = requests.post(updata_link, json=update_data) # TTTEEESSSTTT___________________________________________________________________
-
+                        response = requests.post(updata_link, json=update_data) 
                         add_or_update_ticket(ticket_number, 1, last_modified)
                                         
 
@@ -410,7 +409,7 @@ def glpi_main(tik_aid_main, session_token):
                                 all_info = merge_ticket_and_user_details(ticket_details, user_details, technician_id)
 
                                 try: 
-                                    response = glpi_unassign_user_from_ticket(session_token, ticket_number, requester_id) #TTTEEESSSTTT___________________________
+                                    response = glpi_unassign_user_from_ticket(session_token, ticket_number, requester_id) 
                                     response = glpi_close_ticket(session_token, ticket_number, "Ticket Forwarded")
                                 except Exception as e:
                                     print(f"Error occured: unassign/close ticket: {response}")
