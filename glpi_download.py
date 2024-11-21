@@ -5,16 +5,11 @@ import requests, html, re
 from data import  add_or_update_ticket, load_tickets, remove_ticket, load_local_viewer_id
 import settings
 from glpi_upload import glpi_unassign_user_from_ticket, glpi_close_ticket
+from glpi_utiles import header
 
 #DOWNLOAD FROM GLPI
     
-def header(session_token):
-    headers = {
-        'Content-Type': 'application/json',
-        'Session-Token': session_token,
-        'App-Token': settings.App_Token
-    }
-    return headers
+
 
 def search_latest_ticket(session_token, last_tik):
     ranga=f'0-{last_tik}'
