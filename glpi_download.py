@@ -271,14 +271,18 @@ def glpi_main(tik_aid_main, session_token):
             if tickets:
                 for ticket in tickets:
                     
-                    ticket_number, prev_last_modified = ticket
+                    
                     if len(ticket) < 2:
                         print(f"Skipping ticket due to missing data: {ticket}")
                         continue  
+                    ticket_number, prev_last_modified = ticket
                     last_modified_data = prev_last_modified
                     try:
                         date_format = "%Y-%m-%d %H:%M:%S"
                         tick_details = get_ticket_details(session_token, ticket_number)
+                        if tick_details is None:
+                            print(f"Ticket details for ticket {ticket_number} are None. Skipping...")
+                            continue
                         last_modified = tick_details.get('date_mod')
                         last_modified_data =  datetime.strptime(last_modified, date_format)
                         prev_last_modified =  datetime.strptime(prev_last_modified, date_format) 
