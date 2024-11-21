@@ -319,7 +319,8 @@ def glpi_main(tik_aid_main, session_token):
                                     'migacz':''
                                 }
 
-                        response = requests.post(updata_link, json=update_data) 
+                        response = requests.put(updata_link, json=update_data) 
+                        response.raise_for_status()
                         add_or_update_ticket(ticket_number, 1, last_modified)
                                         
 
@@ -375,6 +376,7 @@ def glpi_main(tik_aid_main, session_token):
                                 }
                                 
                                 response = requests.post(updata_link, json=update_data)
+                                response.raise_for_status()
 
                                 is_it, state_num = is_ticket_open(session_token, ticket_number)
                                 
@@ -391,10 +393,10 @@ def glpi_main(tik_aid_main, session_token):
                                     'migacz':''
                                 }
 
-                                response = requests.post(updata_link, json=update_data)
+                                response = requests.put(updata_link, json=update_data)
                                 
                         except Exception as e:
-                            print(f"Error checking or closing ticket {ticket_number}: {e}")
+                            print(f"Error checking or closing ticket {ticket_number}:")
                             continue
  
 
@@ -432,7 +434,7 @@ def glpi_main(tik_aid_main, session_token):
                                     print(f"Error: {str(e)}")
                                 
                         except Exception as e:
-                            print(f"Error checking requestype of ticket {ticket_number}: {e}")
+                            print(f"Error checking requestype of ticket {ticket_number}: ")
 
             sleep(sleeper)
 
