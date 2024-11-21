@@ -66,6 +66,7 @@ def continuous_download():
 
                 #latest_ticket_id = download_result.get('id')
                 add_local_viewer_id_ticket(latest_ticket_id, local_viewer_id)
+                print(local_viewer_id)
 
                 if latest_ticket_id:
                     with open(settings.Id_File, "w") as file:

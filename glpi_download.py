@@ -311,7 +311,7 @@ def glpi_main(tik_aid_main, session_token):
                         all_details = merge_ticket_and_user_details(tick_details, user_details, ass_technician_id)
 
                         
-                        updata_link = settings.Ticket_Local_Viewer_Link + "/" + str(local_viewer_id)
+                        updata_link = settings.Ticket_Local_Viewer_Link + f"/{int(local_viewer_id)}"
                         
                         update_data = {
                                     'title':str(all_details.get('title')),
