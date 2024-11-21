@@ -21,16 +21,17 @@ def init_database():
     conn.commit()
     return conn, cursor
 
+
 def add_or_update_ticket(ticket_number, last_checked_id, last_modified):
     conn, cursor = init_database()
 
     cursor.execute('''
         INSERT INTO tickets (ticket_number, last_checked_id, last_modified)
         VALUES (?, ?, ?)
-        ON CONFLICT(ticket_number)
-        DO UPDATE SET last_checked_id=excluded.last_checked_id,
-        last_modified = excluded.last_modified
-        ''', (ticket_number, last_checked_id, last_modified))
+        ON CONFLICT(ticket_number) DO UPDATE SET 
+            last_checked_id = ?,
+            last_modified = ?
+    ''', (ticket_number, last_checked_id, last_modified, last_checked_id, last_modified))
 
     conn.commit()
     print(f"SQL: Ticket {ticket_number} added/updated - watch list")
@@ -52,7 +53,7 @@ def add_local_viewer_id_ticket(ticket_number, local_viewer_id):
 
 def load_local_viewer_id(ticket_number):
     conn, cursor = init_database()
-    cursor.execute('''SELECT ticket_number, local_viewer_id FROM tickets WHERE ticket_number = ?''', (ticket_number))
+    cursor.execute('''SELECT ticket_number, local_viewer_id FROM tickets WHERE ticket_number = ?''', (ticket_number,))  # Zmień na `(ticket_number,)`
     reta = cursor.fetchall()
     conn.close()
     return reta
@@ -92,12 +93,13 @@ def perform_deletions():
     conn, cursor = init_database()
     current_time = datetime.now()
     try:
-        loc_viewers = cursor.execute('SELECT local_viewer_id FROM tickets WHERE delete_time <= ?', (current_time,))
+        loc_viewers = cursor.execute('SELECT local_viewer_id FROM tickets WHERE delete_time <= ?', (current_time,)).fetchall()
         for loc_viewer in loc_viewers:
-            l_id = loc_viewer.get('local_viewer_id')
-            response = requests.delete(settings.Ticket_Local_Viewer_Link + l_id , json={})
+            l_id = loc_viewer[0]  
+            response = requests.delete(settings.Ticket_Local_Viewer_Link + str(l_id), json={})
     except Exception as e:
-        print('ERROR PERFORM DELETE from local viewer')
+        print('ERROR PERFORM DELETE from local viewer:', e)
+    
     cursor.execute('DELETE FROM tickets WHERE delete_time <= ?', (current_time,))
     conn.commit()
     conn.close()
