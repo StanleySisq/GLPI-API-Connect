@@ -399,7 +399,7 @@ def glpi_main(tik_aid_main, session_token):
                                 response = requests.put(updata_link, json=update_data)
                                 
                         except Exception as e:
-                            print(f"Error checking or closing ticket {ticket_number}:")
+                            print(f"Error checking or closing ticket {ticket_number}: {e}")
                             continue
  
 
