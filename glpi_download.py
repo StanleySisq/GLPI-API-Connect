@@ -324,11 +324,11 @@ def glpi_main(tik_aid_main, session_token):
 
                         response = requests.put(updata_link, json=update_data) 
                         response.raise_for_status()
-                        if response.status_code == 404:
+                        if response.status_code == 200:
+                            add_or_update_ticket(ticket_number, 1, last_modified)
+                        else:
                             remove_ticket(ticket_number, 0)
                             perform_deletions()
-                        else:
-                            add_or_update_ticket(ticket_number, 1, last_modified)
                                         
 
                         """
@@ -385,15 +385,13 @@ def glpi_main(tik_aid_main, session_token):
                                 response = requests.put(updata_link, json=update_data)
                                 response.raise_for_status()
                                 if response.status_code == 404:
-                                    remove_ticket(ticket_number, 0)
-                                    perform_deletions()
-                                else:
-                                
-
                                     is_it, state_num = is_ticket_open(session_token, ticket_number)
                                                                 
                                     if state_num > 4:
                                         remove_ticket(ticket_number, 72)
+                                else:
+                                    remove_ticket(ticket_number, 0)
+                                    perform_deletions()
 
                             elif assigned_to != "Other":
                                 update_data = {
@@ -407,7 +405,7 @@ def glpi_main(tik_aid_main, session_token):
 
                                 response = requests.put(updata_link, json=update_data)
                                 response.raise_for_status()
-                                if response.status_code == 404:
+                                if response.status_code != 200:
                                     remove_ticket(ticket_number, 0)
                                     perform_deletions()
                                 
