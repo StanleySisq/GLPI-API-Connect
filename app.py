@@ -4,7 +4,7 @@ import requests, threading, time
 from glpi_download import glpi_main, check_ticket_state_and_technic
 from glpi_upload import glpi_add_solution, glpi_add_followup, glpi_add_task_to_ticket, glpi_create_ticket, glpi_close_ticket
 import settings
-from data import add_local_viewer_id_ticket, perform_deletions
+from data import add_local_viewer_id_ticket, perform_deletions, remove_ticket
 
 app = Flask(__name__)
 
@@ -83,6 +83,9 @@ def continuous_download():
                                     'migacz':'False'
                                 }
                     response = requests.put(updata_link, json=update_data)
+                    if response.status_code != 200:
+                        remove_ticket(latest_ticket_id, 0)
+                        perform_deletions()
 
         except Exception as e:
             print(f"Error while downloading or sending the ticket (app): {download_result} || ")
