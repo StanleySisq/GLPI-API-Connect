@@ -2,7 +2,7 @@
 from datetime import datetime
 from time import sleep
 import requests, html, re
-from data import  add_or_update_ticket, load_tickets, remove_ticket, load_local_viewer_id
+from data import  add_or_update_ticket, load_tickets, remove_ticket, load_local_viewer_id,perform_deletions
 import settings
 from glpi_upload import glpi_unassign_user_from_ticket, glpi_close_ticket
 from glpi_utiles import header
@@ -324,7 +324,11 @@ def glpi_main(tik_aid_main, session_token):
 
                         response = requests.put(updata_link, json=update_data) 
                         response.raise_for_status()
-                        add_or_update_ticket(ticket_number, 1, last_modified)
+                        if response.status_code == 400:
+                            remove_ticket(ticket_number, 0)
+                            perform_deletions()
+                        else:
+                            add_or_update_ticket(ticket_number, 1, last_modified)
                                         
 
                         """
@@ -380,11 +384,16 @@ def glpi_main(tik_aid_main, session_token):
                                 
                                 response = requests.put(updata_link, json=update_data)
                                 response.raise_for_status()
-
-                                is_it, state_num = is_ticket_open(session_token, ticket_number)
+                                if response.status_code == 400:
+                                    remove_ticket(ticket_number, 0)
+                                    perform_deletions()
+                                else:
                                 
-                                if state_num > 4:
-                                    remove_ticket(ticket_number, 72)
+
+                                    is_it, state_num = is_ticket_open(session_token, ticket_number)
+                                                                
+                                    if state_num > 4:
+                                        remove_ticket(ticket_number, 72)
 
                             elif assigned_to != "Other":
                                 update_data = {
@@ -398,6 +407,9 @@ def glpi_main(tik_aid_main, session_token):
 
                                 response = requests.put(updata_link, json=update_data)
                                 response.raise_for_status()
+                                if response.status_code == 400:
+                                    remove_ticket(ticket_number, 0)
+                                    perform_deletions()
                                 
                         except Exception as e:
                             print(f"Error checking or closing ticket {ticket_number}: {e}")
@@ -434,7 +446,7 @@ def glpi_main(tik_aid_main, session_token):
                                         print("New ticket sent successfully.")
 
                                 except Exception as e:
-                                    print(f"Error while downloading or sending the ticket (): {all_info} || ")
+                                    print(f"Error while downloading or sending the ticket XXX (): || ")
                                     print(f"Error: {str(e)}")
                                 
                         except Exception as e:

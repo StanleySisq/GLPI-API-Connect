@@ -72,7 +72,10 @@ def load_tickets():
 def remove_ticket(ticket_number, when=72):
     #add expire date to ticket
     conn, cursor = init_database()
-    delete_time = datetime.now() + timedelta(hours=when)  # when delete? 72h from now
+    if when == 0:
+        delete_time = datetime.now()
+    else:
+        delete_time = datetime.now() + timedelta(hours=when)  # when delete? 72h from now
     try:
         cursor.execute('''
             UPDATE tickets 
@@ -100,6 +103,7 @@ def perform_deletions():
         loc_viewers = cursor.execute('SELECT local_viewer_id FROM tickets WHERE delete_time <= ?', (current_time,)).fetchall()
         for loc_viewer in loc_viewers:
             l_id = loc_viewer[0]  
+            
             response = requests.delete(settings.Ticket_Local_Viewer_Link + str(l_id), json={})
     except Exception as e:
         print('ERROR PERFORM DELETE from local viewer:', e)
