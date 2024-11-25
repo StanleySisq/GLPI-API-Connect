@@ -324,7 +324,7 @@ def glpi_main(tik_aid_main, session_token):
 
                         response = requests.put(updata_link, json=update_data) 
                         response.raise_for_status()
-                        if response.status_code == 400:
+                        if response.status_code == 404:
                             remove_ticket(ticket_number, 0)
                             perform_deletions()
                         else:
@@ -384,7 +384,7 @@ def glpi_main(tik_aid_main, session_token):
                                 
                                 response = requests.put(updata_link, json=update_data)
                                 response.raise_for_status()
-                                if response.status_code == 400:
+                                if response.status_code == 404:
                                     remove_ticket(ticket_number, 0)
                                     perform_deletions()
                                 else:
@@ -407,7 +407,7 @@ def glpi_main(tik_aid_main, session_token):
 
                                 response = requests.put(updata_link, json=update_data)
                                 response.raise_for_status()
-                                if response.status_code == 400:
+                                if response.status_code == 404:
                                     remove_ticket(ticket_number, 0)
                                     perform_deletions()
                                 
