@@ -270,8 +270,7 @@ def glpi_main(tik_aid_main, session_token):
             
             if tickets:
                 for ticket in tickets:
-                    
-                    
+                                       
                     if len(ticket) < 2:
                         print(f"Skipping ticket due to missing data: {ticket}")
                         continue  
@@ -290,11 +289,10 @@ def glpi_main(tik_aid_main, session_token):
                         print("Error while get last modified: ")
                         continue
                     if prev_last_modified < last_modified_data: 
-                        #REPAIR - same thing in main and here (dwnld all_details)
-
+                        
                         local_viewer_id = load_local_viewer_id(ticket_number)
                         if not local_viewer_id or local_viewer_id == 0:
-                            print(f"No local viewer ID found for ticket {ticket_number}. Skipping...")
+                            #print(f"No local viewer ID found for ticket {ticket_number}. Skipping...")
                             continue
                         try:
                             users_id_lastupdater, ass_technician_id = get_assigned_users_from_ticket(session_token, latest_ticket_id)
@@ -384,7 +382,7 @@ def glpi_main(tik_aid_main, session_token):
                                 
                                 response = requests.put(updata_link, json=update_data)
                                 response.raise_for_status()
-                                if response.status_code == 404:
+                                if response.status_code == 200:
                                     is_it, state_num = is_ticket_open(session_token, ticket_number)
                                                                 
                                     if state_num > 4:
