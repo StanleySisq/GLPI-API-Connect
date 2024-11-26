@@ -60,22 +60,22 @@ def continuous_download():
                 
                 response = requests.post(settings.Ticket_Local_Viewer_Link, json=download_result)
                 response.raise_for_status()
-                if latest_ticket_id:
-                        with open(settings.Id_File, "w") as file:
-                            file.write(str(latest_ticket_id))
-                        print(f"Updated latest ticket ID to {latest_ticket_id}")
-                if response.status_code == 200:
-                    data_respa = response.json()
-                    local_viewer_id = data_respa.get('ticket_id')
-                    print("New ticket sent successfully.")
+                
+                data_respa = response.json()
+                local_viewer_id = data_respa.get('ticket_id')
+                print("New ticket sent successfully.")
 
                 #latest_ticket_id = download_result.get('id')
-                    add_local_viewer_id_ticket(latest_ticket_id, local_viewer_id)
-                    print(local_viewer_id)
+                add_local_viewer_id_ticket(latest_ticket_id, local_viewer_id)
+                print(local_viewer_id)
 
-                    if hide_ticket:
-                        updata_link = settings.Ticket_Local_Viewer_Link + f"/{local_viewer_id}"
-                        update_data = {
+                if latest_ticket_id:
+                    with open(settings.Id_File, "w") as file:
+                        file.write(str(latest_ticket_id))
+                    print(f"Updated latest ticket ID to {latest_ticket_id}")
+                if hide_ticket:
+                    updata_link = settings.Ticket_Local_Viewer_Link + f"/{local_viewer_id}"
+                    update_data = {
                                     'title':'',
                                     'contact':'',
                                     'client':'',
@@ -83,12 +83,10 @@ def continuous_download():
                                     'visible': 'False',
                                     'migacz':'False'
                                 }
-                        response = requests.put(updata_link, json=update_data)
-                        if response.status_code != 200:
-                            remove_ticket(latest_ticket_id, 0)
-                            perform_deletions()
-                else:
-                    print("Error sending new ticket out (app)")
+                    response = requests.put(updata_link, json=update_data)
+                if response.status_code != 200:
+                    remove_ticket(latest_ticket_id, 0)
+                    perform_deletions()
 
         except Exception as e:
             print(f"Error while downloading or sending the ticket (app): {download_result} || ")
