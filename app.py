@@ -84,9 +84,9 @@ def continuous_download():
                                     'migacz':'False'
                                 }
                     response = requests.put(updata_link, json=update_data)
-                if response.status_code != 200:
-                    remove_ticket(latest_ticket_id, 0)
-                    perform_deletions()
+                    if response.status_code != 200:
+                        remove_ticket(latest_ticket_id, 0)
+                        perform_deletions()
 
         except Exception as e:
             print(f"Error while downloading or sending the ticket (app): {download_result} || ")
