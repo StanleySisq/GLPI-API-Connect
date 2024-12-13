@@ -251,7 +251,8 @@ def glpi_main(tik_aid_main, session_token):
                         "title": str(all_details.get('title')),
                         "contact": str(all_details.get('firstname')+" "+all_details.get('surname')), 
                         "client": str(entities_map.get(all_details.get('entities_id'))),
-                        "gid": str(all_details.get('gid'))
+                        "gid": str(all_details.get('gid')),
+                        "link": settings.link+str(all_details.get('id'))
                     }
                     hide_ticket = True
                     if str(ass_technician_id) in ["None", "8", "7", "2747", "2702", "2703", "2731", "2555", "2662", "3793"]:
@@ -320,7 +321,7 @@ def glpi_main(tik_aid_main, session_token):
                                 }
 
                         response = requests.put(updata_link, json=update_data) 
-                        response.raise_for_status()
+                        #response.raise_for_status()
                         if response.status_code == 200:
                             add_or_update_ticket(ticket_number, 1, last_modified)
                         else:
@@ -380,7 +381,7 @@ def glpi_main(tik_aid_main, session_token):
                                 }
                                 
                                 response = requests.put(updata_link, json=update_data)
-                                response.raise_for_status()
+                                #response.raise_for_status()
                                 if response.status_code == 200:
                                     is_it, state_num = is_ticket_open(session_token, ticket_number)
                                                                 
@@ -401,7 +402,7 @@ def glpi_main(tik_aid_main, session_token):
                                 }
 
                                 response = requests.put(updata_link, json=update_data)
-                                response.raise_for_status()
+                                #response.raise_for_status()
                                 if response.status_code != 200:
                                     remove_ticket(ticket_number, 0)
                                     perform_deletions()
