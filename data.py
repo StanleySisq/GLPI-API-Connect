@@ -104,7 +104,8 @@ def perform_deletions():
         for loc_viewer in loc_viewers:
             l_id = loc_viewer[0]  
             
-            response = requests.delete(settings.Ticket_Local_Viewer_Link + str(l_id), json={})
+            response = requests.delete(settings.Ticket_Local_Viewer_Link + "/"+str(l_id), json={})
+            response.raise_for_status()
     except Exception as e:
         print('ERROR PERFORM DELETE from local viewer:', e)
     

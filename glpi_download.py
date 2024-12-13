@@ -9,8 +9,6 @@ from glpi_utiles import header
 
 #DOWNLOAD FROM GLPI
     
-
-
 def search_latest_ticket(session_token, last_tik):
     ranga=f'0-{last_tik}'
     
@@ -78,7 +76,8 @@ def merge_ticket_and_user_details(ticket_details, user_details, technic_id):
     }
     return merged_details
 
-#Not used
+#Not used 
+"""
 def get_followups(ticket_id, session_token):
     url = f"{settings.Glpi_Url}/Ticket/{ticket_id}/ITILFollowup/"
     response = requests.get(url, headers=header(session_token))
@@ -94,7 +93,7 @@ def send_followup(followup_content, ticket_id, owner_id):
     response = requests.post(settings.Followup_Post_Link, json=payload)
     response.raise_for_status()
     print("followup sent")
-
+"""
 def is_ticket_open(session_token, ticket_id):  
     response = requests.get(f"{settings.Glpi_Url}/Ticket/{ticket_id}", headers=header(session_token))
     status = 6
@@ -107,7 +106,7 @@ def is_ticket_open(session_token, ticket_id):
         print(f"Error checking ticket status: {response.status_code}")
         print(response.text)
         return False, status
-
+"""
 #Not used
 def send_ticket_closure_info(ticket_id, user_id):
     payload = {
@@ -119,7 +118,7 @@ def send_ticket_closure_info(ticket_id, user_id):
     response = requests.post(settings.Close_Ticket_Post_Link, json=payload, headers=headers)
     response.raise_for_status()
     print("ticket closure sent")
-
+"""
 def get_assigned_users_from_ticket(session_token, ticket_id):
 
     url = f"{settings.Glpi_Url}/Ticket/{ticket_id}/Ticket_User"
