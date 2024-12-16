@@ -257,9 +257,10 @@ def glpi_main(tik_aid_main, session_token):
                     hide_ticket = True
                     if str(ass_technician_id) in ["None", "8", "7", "2747", "2702", "2703", "2731", "2555", "2662", "3793"]:
                         hide_ticket = False
-                        if not is_ticket_open(session_token, latest_ticket_id):
+                        stat, num = is_ticket_open(session_token, latest_ticket_id)
+                        if not stat:
                             hide_ticket = True
-                            
+
                     return data, hide_ticket, latest_ticket_id
                     
                 else:
