@@ -223,6 +223,7 @@ def add_exe():
     try:
         glpi_response = glpi_create_ticket(session_token, title, description, assigned_user_id, assigned_technic_id, unit_id, close_after)
         respa = glpi_add_task_to_ticket(glpi_response.get("id"), "Rozwiązanie",timesum*60 ,session_token)
+        time.sleep(2)
         respa = glpi_close_ticket(session_token, glpi_response.get("id"), "Rozwiązanie")
 
         return jsonify(glpi_response), 200
