@@ -84,6 +84,7 @@ def continuous_download():
                                     'migacz':'False'
                                 }
                     response = requests.put(updata_link, json=update_data)
+                    remove_ticket(latest_ticket_id, 144)
                     if response.status_code != 200:
                         remove_ticket(latest_ticket_id, 0)
                         perform_deletions()
