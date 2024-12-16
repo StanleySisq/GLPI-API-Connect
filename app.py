@@ -220,17 +220,14 @@ def add_exe():
     if not title or not description or not assigned_user_id or not assigned_technic_id or not unit_id:
         return jsonify({"error": "title, description, assigned technic and assigned_user_id are required"}), 400
 
-    def uploader():
-        try:
-            glpi_response = glpi_create_ticket(session_token, title, description, assigned_user_id, assigned_technic_id, unit_id, close_after)
-            respa = glpi_add_task_to_ticket(glpi_response.get("id"), "Rozwiązanie",timesum*60 ,session_token)
-            time.sleep(5)
-            respa = glpi_close_ticket(session_token, glpi_response.get("id"), "Rozwiązanie")
+    try:
+        glpi_response = glpi_create_ticket(session_token, title, description, assigned_user_id, assigned_technic_id, unit_id, close_after)
+        respa = glpi_add_task_to_ticket(glpi_response.get("id"), "Rozwiązanie",timesum*60 ,session_token)
+        respa = glpi_close_ticket(session_token, glpi_response.get("id"), "Rozwiązanie")
 
-            return jsonify(glpi_response), 200
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
-    threading.Thread(target=uploader, daemon=True).start()
+        return jsonify(glpi_response), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     session_fresher = threading.Thread(target=refresh_sesion)
