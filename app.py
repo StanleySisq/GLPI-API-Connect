@@ -191,6 +191,43 @@ def check_state():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+@app.route('/add_exe', methods=['POST'])
+def add_exe():
+    data = request.json
+
+    title = data.get('title')
+    timesum = data.get('time')
+    company = data.get('company')
+
+    description = title
+    
+    if company == "SAR":
+        assigned_user_id = "LQ5789-NN"
+        unit_id = 2
+    elif company == "Services":
+        assigned_user_id = "RF5150-NN"
+        unit_id = 1
+    elif company == "EZE":
+        assigned_user_id = "AHI293"
+        unit_id = 3
+    elif company == "EC Słupsk":
+        assigned_user_id = "ZS5445"
+        unit_id = 5
+    
+    assigned_technic_id = 8
+    close_after = "No"
+
+    if not title or not description or not assigned_user_id or not assigned_technic_id or not unit_id:
+        return jsonify({"error": "title, description, assigned technic and assigned_user_id are required"}), 400
+
+    try:
+        glpi_response = glpi_create_ticket(session_token, title, description, assigned_user_id, assigned_technic_id, unit_id, close_after)
+        respa = glpi_add_task_to_ticket(glpi_response.get("id"), "Rozwiązanie", session_token)
+        respa = glpi_close_ticket(session_token, glpi_response.get("id"), "Rozwiązanie")
+
+        return jsonify(glpi_response), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     session_fresher = threading.Thread(target=refresh_sesion)
