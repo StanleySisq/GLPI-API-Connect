@@ -2,7 +2,7 @@ import json
 from flask import Flask, jsonify, request, make_response
 import requests, threading, time
 from glpi_download import glpi_main, check_ticket_state_and_technic
-from glpi_upload import glpi_add_solution, glpi_add_followup, glpi_add_task_to_ticket, glpi_create_ticket, glpi_close_ticket
+from glpi_upload import glpi_add_solution, glpi_add_followup, glpi_add_task_to_ticket, glpi_create_ticket, glpi_close_ticket, glpi_write_custom_fields
 import settings
 from data import add_local_viewer_id_ticket, perform_deletions, remove_ticket
 
@@ -84,7 +84,7 @@ def continuous_download():
                                     'migacz':'False'
                                 }
                     response = requests.put(updata_link, json=update_data)
-                    remove_ticket(latest_ticket_id, 144)
+                    remove_ticket(latest_ticket_id, 168)
                     if response.status_code != 200:
                         remove_ticket(latest_ticket_id, 0)
                         perform_deletions()
@@ -177,6 +177,8 @@ def check_state():
     data = request.json
 
     ticket_id = data.get('ticket_id')
+    if not ticket_id:
+        return jsonify({"error": "ticket id are required"}), 400
 
     try:
         state, assigned_to = check_ticket_state_and_technic(session_token, ticket_id)
@@ -199,7 +201,9 @@ def add_exe():
     title = data.get('title')
     timesum = data.get('time')
     company = data.get('company')
-
+    if not title or not timesum or not company:
+        return jsonify({"error": "title, time and company are required"}), 400
+    
     description = title
     
     if company == "SAR":
@@ -227,6 +231,38 @@ def add_exe():
         respa = glpi_close_ticket(session_token, glpi_response.get("id"), "Rozwiązanie")
 
         return jsonify(glpi_response), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/update_customs', methods=['POST'])
+def update_customs():
+    data = request.json
+
+    ticket_id = data.get('ticket_id')
+    entitlement =  data.get('entitlement', 0)
+    cost_category = data.get('cost_category', 0)
+    additional = data.get('additional', 0)
+    if not ticket_id:
+        return jsonify({"error": "ticket_id, entitlement,cost category and if additional are required"}), 400
+    
+    if entitlement =="Administracyjne": 
+        entitlement = 2
+    elif entitlement =="Helpdesk": 
+        entitlement = 1
+    if cost_category =="Korporacyjne": 
+        cost_category = 2
+    elif cost_category =="Własne": 
+        cost_category = 1
+    if additional =="Tak": 
+        additional = 1
+    elif additional =="Nie": 
+        additional = 0
+
+    try:
+        response = glpi_write_custom_fields(session_token, ticket_id, entitlement, cost_category, additional )
+        print(f"Ticket: {ticket_id} - Custom fields updated succesfully")
+        return jsonify(response), 200
+    
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

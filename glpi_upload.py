@@ -210,3 +210,75 @@ def glpi_close_ticket(session_token, ticket_id, content):
     else:
         print(f"Error closing ticket {ticket_id}: {response.status_code} - {response.text}")
         response.raise_for_status()
+
+def get_customfield_id(session_token, ticket_id):
+ 
+    endpoint = f"{settings.Glpi_Url}/{settings.Custom_Fields}?criteria[0][field]=items_id&criteria[0][searchtype]=equals&criteria[0][value]={ticket_id}"
+
+    response = requests.get(endpoint, headers=header(session_token))
+
+    if response.status_code == 200:
+        datas = response.json()
+        if datas:
+            #uprawnienie = None
+            #wydatek = None
+            #dodatek = None
+            id = None
+
+            for data in datas:
+                if data.get('items_id') == ticket_id:
+                    #uprawnienie = data.get("plugin_fields_uprawnieniefielddropdowns_id", None)
+                    #wydatek = data.get("plugin_fields_kategoriawydatkufielddropdowns_id", None)
+                    #dodatek = data.get("czydodatkowefield", None)
+                    id = data.get("id", None)
+                    break
+        else:
+            return None
+    else:
+        return None
+    
+    return id
+    
+def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_category=0, additional=0):
+
+    endpoint = f"{settings.Glpi_Url}/{settings.Custom_Fields}"
+
+    custom_fields = {
+        "items_id": ticket_id,  
+        "plugin_fields_uprawnieniefielddropdowns_id": entitlement,
+        "plugin_fields_kategoriawydatkufielddropdowns_id":cost_category,
+        "czydodatkowefield": additional
+    }
+
+    data = {
+        "input": custom_fields
+    }
+
+    response = requests.post(endpoint, headers=header(session_token), json=data)
+
+    if response.status_code in [200, 201]:
+        return response.json()
+    else:
+        custom_field_id = get_customfield_id(session_token, ticket_id)
+
+        endpoint = f"{settings.Glpi_Url}/{settings.Custom_Fields}/{custom_field_id}"
+
+        custom_fields = {}
+        if entitlement is not None:
+            custom_fields["plugin_fields_uprawnieniefielddropdowns_id"] = entitlement
+        if cost_category is not None:
+            custom_fields["plugin_fields_kategoriawydatkufielddropdowns_id"] = cost_category
+        if additional is not None:
+            custom_fields["czydodatkowefield"] = additional
+
+        data = {
+            "input": custom_fields
+        }
+
+        response = requests.put(endpoint, headers=header(session_token), json=data)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(f"Error updating custom fields with ID {custom_field_id} in {settings.Custom_Fields}: {response.status_code} - {response.text}")
+            return None
