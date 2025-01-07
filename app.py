@@ -155,18 +155,19 @@ def add_task():
 def add_ticket():
     data = request.json
 
+    tick_type = data.get('tick_type', "Incydent")
     title = data.get('title')
     description = data.get('description')
     assigned_user_id = str(data.get('assigned_user_id'))
     assigned_technic_id = data.get('assigned_technic_id')
     unit_id = data.get('unit_id')
-    close_after = data.get('close_after')
+    close_after = data.get('close_after', "No")
 
     if not title or not description or not assigned_user_id or not assigned_technic_id or not unit_id:
         return jsonify({"error": "title, description, assigned technic and assigned_user_id are required"}), 400
 
     try:
-        glpi_response = glpi_create_ticket(session_token, title, description, assigned_user_id, assigned_technic_id, unit_id, close_after)
+        glpi_response = glpi_create_ticket(session_token, title, description, assigned_user_id, assigned_technic_id, unit_id, close_after, tick_type)
 
         return jsonify(glpi_response), 200
     except Exception as e:
@@ -236,7 +237,7 @@ def add_exe():
     
 @app.route('/update_customs', methods=['POST'])
 def update_customs():
-    data = request.json
+    data = request.json  
 
     ticket_id = data.get('ticket_id')
     entitlement =  data.get('entitlement', 0)

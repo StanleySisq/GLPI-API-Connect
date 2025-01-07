@@ -92,9 +92,14 @@ def get_user_id_and_unit_by_gid(session_token, gid):
         print(response.text)
         return None
 
-def glpi_create_ticket(session_token, title, description, assigned_user_gid, assigned_technic_gid, unit_id, close_after):
+def glpi_create_ticket(session_token, title, description, assigned_user_gid, assigned_technic_gid, unit_id, close_after, tick_type):
     assigned_user_id = get_user_id_and_unit_by_gid(session_token, assigned_user_gid)
     assigned_technic_id = assigned_technic_gid #get_user_id_and_unit_by_gid(session_token, assigned_technic_gid)
+    if tick_type == "Wniosek":
+        tick_type = 2
+    else:
+        tick_type = 1
+    
     ticket_data = {
         "input": {
             "name": title,
@@ -103,7 +108,7 @@ def glpi_create_ticket(session_token, title, description, assigned_user_gid, ass
             "urgency": 3,  
             "impact": 3,  
             "priority": 3,  
-            "type": 1,  
+            "type": tick_type,  
             "entities_id": unit_id  
         }
     }
