@@ -217,8 +217,8 @@ def glpi_close_ticket(session_token, ticket_id, content):
         response.raise_for_status()
 
 def get_customfield_id(session_token, ticket_id):
-    
-    endpoint = f"{settings.Glpi_Url}/PluginFieldsTicketDodatkowe?criteria[0][field]=items_id&criteria[0][searchtype]=equals&criteria[0][value]={ticket_id}"
+    ticket_ide = 1514
+    endpoint = f"{settings.Glpi_Url}/PluginFieldsTicketDodatkowe?criteria[0][field]=items_id&criteria[0][searchtype]=equals&criteria[0][value]={ticket_ide}"
 
     response = requests.get(endpoint, headers=header(session_token))
     
@@ -231,7 +231,7 @@ def get_customfield_id(session_token, ticket_id):
             id = None
 
             for data in datas:
-                if data.get('items_id') == ticket_id:
+                if data.get('items_id') == ticket_ide:
                     entitlement = data.get("plugin_fields_uprawnieniefielddropdowns_id")
                     #wydatek = data.get("plugin_fields_kategoriawydatkufielddropdowns_id", None)
                     #dodatek = data.get("czydodatkowefield", None)
