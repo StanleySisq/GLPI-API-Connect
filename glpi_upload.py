@@ -241,7 +241,7 @@ def get_customfield_id(session_token, ticket_id):
             return None
     else:
         return None
-    
+    print(entitlement)
     if entitlement == 2:
         entitlement = "Administracyjne"
     else:
