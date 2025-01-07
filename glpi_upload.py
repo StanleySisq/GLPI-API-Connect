@@ -217,8 +217,8 @@ def glpi_close_ticket(session_token, ticket_id, content):
         response.raise_for_status()
 
 def get_customfield_id(session_token, ticket_id):
-    print(ticket_id)
-    endpoint = f"{settings.Glpi_Url}/{settings.Custom_Fields}?criteria[0][field]=items_id&criteria[0][searchtype]=equals&criteria[0][value]={ticket_id}"
+    
+    endpoint = f"{settings.Glpi_Url}/PluginFieldsTicketDodatkowe?criteria[0][field]=items_id&criteria[0][searchtype]=equals&criteria[0][value]={ticket_id}"
 
     response = requests.get(endpoint, headers=header(session_token))
 
@@ -241,7 +241,6 @@ def get_customfield_id(session_token, ticket_id):
             return None
     else:
         return None
-    print(entitlement)
     if entitlement == 2:
         entitlement = "Administracyjne"
     else:
