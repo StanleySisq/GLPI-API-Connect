@@ -232,7 +232,7 @@ def get_customfield_id(session_token, ticket_id):
 
             for data in datas:
                 if data.get('items_id') == ticket_id:
-                    entitlement = data.get("plugin_fields_uprawnieniefielddropdowns_id", 0)
+                    entitlement = data.get("plugin_fields_uprawnieniefielddropdowns_id", "Helpdesk")
                     #wydatek = data.get("plugin_fields_kategoriawydatkufielddropdowns_id", None)
                     #dodatek = data.get("czydodatkowefield", None)
                     id = data.get("id", None)
@@ -242,10 +242,10 @@ def get_customfield_id(session_token, ticket_id):
     else:
         return None
     
-    if entitlement == 2:
-        entitlement = "Administracyjne"
-    else:
-        entitlement = "Helpdesk"
+    #if entitlement == 2:
+     #   entitlement = "Administracyjne"
+    #else:
+     #   entitlement = "Helpdesk"
 
     return id, entitlement
     

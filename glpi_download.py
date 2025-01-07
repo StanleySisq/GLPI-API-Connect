@@ -301,7 +301,7 @@ def glpi_main(tik_aid_main, session_token):
                             #print(f"No local viewer ID found for ticket {ticket_number}. Skipping...")
                             continue
                         try:
-                            users_id_lastupdater, ass_technician_id = get_assigned_users_from_ticket(session_token, latest_ticket_id)
+                            users_id_lastupdater, ass_technician_id = get_assigned_users_from_ticket(session_token, ticket_number)
                         except Exception as e:
                             print("No Requester Eror")
                         if users_id_lastupdater=="None":
