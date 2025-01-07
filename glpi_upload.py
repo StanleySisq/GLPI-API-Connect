@@ -218,10 +218,9 @@ def glpi_close_ticket(session_token, ticket_id, content):
 
 def get_customfield_id(session_token, ticket_id):
     
-    endpoint = f"{settings.Glpi_Url}/PluginFieldsTicketDodatkowe?criteria[0][field]=items_id&criteria[0][searchtype]=equals&criteria[0][value]={ticket_id}"
+    endpoint = f"{settings.Glpi_Url}/PluginFieldsTicketDodatkowe?criteria[0][field]=items_id&criteria[0][searchtype]=equals&criteria[0][value]=1514"
 
     response = requests.get(endpoint, headers=header(session_token))
-    response.raise_for_status()
     if response.status_code == 200:
         datas = response.json()
         if datas:
@@ -238,8 +237,10 @@ def get_customfield_id(session_token, ticket_id):
                     id = data.get("id", None)
                     break
         else:
+            print("Error No datas")
             return None
     else:
+        print("Error 400")
         return None
     print(entitlement)
     if entitlement == 2:
