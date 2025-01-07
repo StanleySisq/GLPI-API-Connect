@@ -4,7 +4,7 @@ from time import sleep
 import requests, html, re
 from data import  add_or_update_ticket, load_tickets, remove_ticket, load_local_viewer_id,perform_deletions
 import settings
-from glpi_upload import glpi_unassign_user_from_ticket, glpi_close_ticket
+from glpi_upload import glpi_unassign_user_from_ticket, glpi_close_ticket, get_customfield_id
 from glpi_utiles import header
 
 #DOWNLOAD FROM GLPI
@@ -246,14 +246,17 @@ def glpi_main(tik_aid_main, session_token):
                         
                     add_or_update_ticket(latest_ticket_id, 1, last_modified)
 
+                    id, entitlement = get_customfield_id(session_token, latest_ticket_id)
                     
                     data = {
                         "title": str(all_details.get('title')),
                         "contact": str(all_details.get('firstname')+" "+all_details.get('surname')), 
                         "client": str(entities_map.get(all_details.get('entities_id'))),
                         "gid": str(all_details.get('gid')),
-                        "link": settings.link+str(all_details.get('id'))
+                        "link": settings.link+str(all_details.get('id')),
+                        "queue": entitlement
                     }
+                    
                     hide_ticket = True
                     if str(ass_technician_id) in ["None", "8", "7", "2747", "2702", "2703", "2731", "2555", "2662", "3793"]:
                         hide_ticket = False
@@ -313,14 +316,17 @@ def glpi_main(tik_aid_main, session_token):
 
                         
                         updata_link = settings.Ticket_Local_Viewer_Link + f"/{local_viewer_id}"
-                        
+
+                        id, entitlement = get_customfield_id(session_token, ticket_number)
+
                         update_data = {
                                     'title':str(all_details.get('title')),
                                     'contact': str(all_details.get('firstname')+" "+all_details.get('surname')),
                                     'client':str(entities_map.get(all_details.get('entities_id'))),
                                     'gid': str(all_details.get('gid')),
                                     'visible': '',
-                                    'migacz':''
+                                    'migacz':'',
+                                    'queue': entitlement
                                 }
 
                         response = requests.put(updata_link, json=update_data) 
@@ -380,7 +386,8 @@ def glpi_main(tik_aid_main, session_token):
                                     'client':'',
                                     'gid':'',
                                     'visible': 'False',
-                                    'migacz':''
+                                    'migacz':'',
+                                    'queue': entitlement
                                 }
                                 
                                 response = requests.put(updata_link, json=update_data)
@@ -401,7 +408,8 @@ def glpi_main(tik_aid_main, session_token):
                                     'client':'',
                                     'gid':'',
                                     'visible': 'True',
-                                    'migacz':''
+                                    'migacz':'',
+                                    'queue': entitlement
                                 }
 
                                 response = requests.put(updata_link, json=update_data)

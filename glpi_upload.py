@@ -225,14 +225,14 @@ def get_customfield_id(session_token, ticket_id):
     if response.status_code == 200:
         datas = response.json()
         if datas:
-            #uprawnienie = None
+            entitlement = 0
             #wydatek = None
             #dodatek = None
             id = None
 
             for data in datas:
                 if data.get('items_id') == ticket_id:
-                    #uprawnienie = data.get("plugin_fields_uprawnieniefielddropdowns_id", None)
+                    entitlement = data.get("plugin_fields_uprawnieniefielddropdowns_id", 0)
                     #wydatek = data.get("plugin_fields_kategoriawydatkufielddropdowns_id", None)
                     #dodatek = data.get("czydodatkowefield", None)
                     id = data.get("id", None)
@@ -242,7 +242,12 @@ def get_customfield_id(session_token, ticket_id):
     else:
         return None
     
-    return id
+    if entitlement == 2:
+        entitlement = "Administracyjne"
+    else:
+        entitlement = "Helpdesk"
+
+    return id, entitlement
     
 def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_category=0, additional=0):
 
@@ -264,7 +269,7 @@ def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_categ
     if response.status_code in [200, 201]:
         return response.json()
     else:
-        custom_field_id = get_customfield_id(session_token, ticket_id)
+        custom_field_id, entitlement_fa = get_customfield_id(session_token, ticket_id)
 
         endpoint = f"{settings.Glpi_Url}/{settings.Custom_Fields}/{custom_field_id}"
 
