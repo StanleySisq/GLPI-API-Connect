@@ -225,14 +225,14 @@ def get_customfield_id(session_token, ticket_id):
     if response.status_code == 200:
         datas = response.json()
         if datas:
-            entitlement = 0
+            entitlement = None
             #wydatek = None
             #dodatek = None
             id = None
 
             for data in datas:
                 if data.get('items_id') == ticket_id:
-                    print(data)
+                    print(data.json())
                     entitlement = data.get("plugin_fields_uprawnieniefielddropdowns_id")
                     #wydatek = data.get("plugin_fields_kategoriawydatkufielddropdowns_id", None)
                     #dodatek = data.get("czydodatkowefield", None)
