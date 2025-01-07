@@ -232,6 +232,7 @@ def get_customfield_id(session_token, ticket_id):
 
             for data in datas:
                 if data.get('items_id') == ticket_id:
+                    print(data)
                     entitlement = data.get("plugin_fields_uprawnieniefielddropdowns_id")
                     #wydatek = data.get("plugin_fields_kategoriawydatkufielddropdowns_id", None)
                     #dodatek = data.get("czydodatkowefield", None)
