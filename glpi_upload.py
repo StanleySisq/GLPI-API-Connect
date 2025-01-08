@@ -232,7 +232,7 @@ def get_customfield_id(session_token, ticket_id):
 
             for data in datas:
                 if data.get('items_id') == ticket_id:
-                    entitlement = data.get("plugin_fields_uprawnieniefielddropdowns_id")
+                    entitlement = data.get("plugin_fields_teamfielddropdowns_id")
                     #wydatek = data.get("plugin_fields_kategoriawydatkufielddropdowns_id", None)
                     #dodatek = data.get("czydodatkowefield", None)
                     id = data.get("id", None)
@@ -242,14 +242,18 @@ def get_customfield_id(session_token, ticket_id):
     else:
         return None
     #print(entitlement)
-    if entitlement == 2:
-        entitlement = "Helpdesk"
+    if entitlement == 4:
+        entitlement = "Hide"
+    elif entitlement == 3:
+        entitlement = "Grey"
+    elif entitlement == 2:
+        entitlement = "Red"
     else:
-        entitlement = "Helpdesk"
+        entitlement = "Blue"
 
     return id, entitlement
     
-def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_category=0, additional=0):
+def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_category=0, additional=0, team=1):
 
     endpoint = f"{settings.Glpi_Url}/{settings.Custom_Fields}"
 
@@ -257,7 +261,8 @@ def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_categ
         "items_id": ticket_id,  
         "plugin_fields_uprawnieniefielddropdowns_id": entitlement,
         "plugin_fields_kategoriawydatkufielddropdowns_id":cost_category,
-        "czydodatkowefield": additional
+        "czydodatkowefield": additional,
+        "plugin_fields_teamfielddropdowns_id": team
     }
 
     data = {
@@ -280,6 +285,8 @@ def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_categ
             custom_fields["plugin_fields_kategoriawydatkufielddropdowns_id"] = cost_category
         if additional is not None:
             custom_fields["czydodatkowefield"] = additional
+        if team is not None:
+            custom_fields["plugin_fields_teamfielddropdowns_id"] = team
 
         data = {
             "input": custom_fields

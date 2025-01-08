@@ -243,6 +243,7 @@ def update_customs():
     entitlement =  data.get('entitlement', 0)
     cost_category = data.get('cost_category', 0)
     additional = data.get('additional', 0)
+    team = data.get('team')
     if not ticket_id:
         return jsonify({"error": "ticket_id, entitlement,cost category and if additional are required"}), 400
     
@@ -258,9 +259,17 @@ def update_customs():
         additional = 1
     elif additional =="Nie": 
         additional = 0
+    if team =="Blue":
+        team == 1
+    elif team =="Red":
+        team == 2
+    elif team =="Grey":
+        team == 3
+    elif team =="Hide":
+        team == 4
 
     try:
-        response = glpi_write_custom_fields(session_token, ticket_id, entitlement, cost_category, additional )
+        response = glpi_write_custom_fields(session_token, ticket_id, entitlement, cost_category, additional , team)
         print(f"Ticket: {ticket_id} - Custom fields updated succesfully")
         return jsonify(response), 200
     
