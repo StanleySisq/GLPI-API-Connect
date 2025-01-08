@@ -243,7 +243,7 @@ def get_customfield_id(session_token, ticket_id):
         return None
     #print(entitlement)
     if entitlement == 2:
-        entitlement = "Administracyjne"
+        entitlement = "Helpdesk"
     else:
         entitlement = "Helpdesk"
 
