@@ -227,8 +227,9 @@ def add_exe():
         return jsonify({"error": "title, description, assigned technic and assigned_user_id are required"}), 400
 
     try:
-        glpi_response = glpi_create_ticket(session_token, title, description, assigned_user_id, assigned_technic_id, unit_id, close_after)
+        glpi_response = glpi_create_ticket(session_token, title, description, assigned_user_id, assigned_technic_id, unit_id, close_after, "Incydent")
         respa = glpi_add_task_to_ticket(glpi_response.get("id"), "Rozwiązanie",timesum*60 ,session_token)
+        respa = glpi_write_custom_fields(session_token, glpi_response.get("id"), 1, 1, 1 , 2)
         respa = glpi_close_ticket(session_token, glpi_response.get("id"), "Rozwiązanie")
 
         return jsonify(glpi_response), 200
