@@ -10,7 +10,7 @@ from glpi_utiles import header
 #DOWNLOAD FROM GLPI
     
 def search_latest_ticket(session_token, last_tik):
-    ranga=f'0-{last_tik}'
+    ranga=f'0-100'
     
     params = {
         'range': ranga, 
@@ -209,6 +209,11 @@ def glpi_main(tik_aid_main, session_token):
                 break
 
             if int(tik_aid) < latest_ticket_id:
+
+                if int(tik_aid)+1 < latest_ticket_id:
+                    if int(tik_aid)+10 > latest_ticket_id:
+                        latest_ticket_id = int(tik_aid)+1
+                
                 try:
                     with open(settings.Id_File, "w") as file:
                         file.write(str(latest_ticket_id))
