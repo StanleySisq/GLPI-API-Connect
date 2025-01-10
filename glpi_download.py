@@ -20,7 +20,7 @@ def search_latest_ticket(session_token, last_tik):
     
     response = requests.get(f"{settings.Glpi_Url}/search/Ticket", headers=header(session_token), params=params)
     
-    if response.status_code == 200:
+    if response.status_code == 200 or response.status_code == 206 :
         tickets = response.json()
         if 'data' in tickets and tickets['data']:
             latest_ticket = tickets['data'][0]  # Download newest ticket
