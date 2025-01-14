@@ -218,18 +218,18 @@ def glpi_close_ticket(session_token, ticket_id, content):
 
 def get_customfield_id(session_token, ticket_id):
     ticket_id = int(ticket_id)
-    endpoint = f"{settings.Glpi_Url}/{settings.Custom_Fields}?criteria[0][field]=items_id&criteria[0][searchtype]=equals&criteria[0][value]={ticket_id}"
+    #endpoint = f"{settings.Glpi_Url}/{settings.Custom_Fields}?criteria[0][field]=items_id&criteria[0][searchtype]=equals&criteria[0][value]={ticket_id}"
+    endpoint = f"{settings.Glpi_Url}/{settings.Custom_Fields}?sort=id&order=DESC&range=0-100"
 
     response = requests.get(endpoint, headers=header(session_token))
     
-    if response.status_code == 200:
+    if response.status_code == 200 or response.status_code == 206:
         datas = response.json()
+        entitlement = 0
+        id = 0
         if datas:
-            entitlement = 0
             #wydatek = None
             #dodatek = None
-            id = 0
-
             for data in datas:
                 if data.get('items_id') == ticket_id:
                     entitlement = data.get("plugin_fields_teamfielddropdowns_id")
@@ -237,6 +237,26 @@ def get_customfield_id(session_token, ticket_id):
                     #dodatek = data.get("czydodatkowefield", None)
                     id = data.get("id", 0)
                     break
+            
+            if entitlement == 0 and id == 0:
+                endpoint = f"{settings.Glpi_Url}/{settings.Custom_Fields}?sort=id&order=DESC&range=0-750"
+
+                response = requests.get(endpoint, headers=header(session_token))
+                
+                if response.status_code == 200 or response.status_code == 206:
+                    datas = response.json()
+                    if datas:
+                        for data in datas:
+                            if data.get('items_id') == ticket_id:
+                                entitlement = data.get("plugin_fields_teamfielddropdowns_id")
+                                #wydatek = data.get("plugin_fields_kategoriawydatkufielddropdowns_id", None)
+                                #dodatek = data.get("czydodatkowefield", None)
+                                id = data.get("id", 0)
+                                break 
+                    else:
+                        return 0, "Blue"
+                else:
+                    return 0, "Blue"
         else:
             return 0, "Blue"
     else:
