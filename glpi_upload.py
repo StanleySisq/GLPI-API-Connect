@@ -228,19 +228,19 @@ def get_customfield_id(session_token, ticket_id):
             entitlement = 0
             #wydatek = None
             #dodatek = None
-            id = None
+            id = 0
 
             for data in datas:
                 if data.get('items_id') == ticket_id:
                     entitlement = data.get("plugin_fields_teamfielddropdowns_id")
                     #wydatek = data.get("plugin_fields_kategoriawydatkufielddropdowns_id", None)
                     #dodatek = data.get("czydodatkowefield", None)
-                    id = data.get("id", None)
+                    id = data.get("id", 0)
                     break
         else:
-            return None
+            return 0, "Blue"
     else:
-        return None
+        return 0, "Blue"
     #print(entitlement)
     if entitlement == 4:
         entitlement = "Hide"

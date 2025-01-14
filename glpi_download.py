@@ -188,6 +188,7 @@ def is_ticket_source_xxx(session_token, ticket_id):
 
 def glpi_main(tik_aid_main, session_token):
     all_details = {}
+    data = {}
     try:
         tik_aid = tik_aid_main
         entities_map = settings.entities_names
@@ -316,32 +317,35 @@ def glpi_main(tik_aid_main, session_token):
                         except Exception as e:
                             print("Error getting user details: ")
                             break
-                        
-                        all_details = merge_ticket_and_user_details(tick_details, user_details, ass_technician_id)
+                        #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        try:
+                            all_details = merge_ticket_and_user_details(tick_details, user_details, ass_technician_id)
 
-                        
-                        updata_link = settings.Ticket_Local_Viewer_Link + f"/{local_viewer_id}"
+                            
+                            updata_link = settings.Ticket_Local_Viewer_Link + f"/{local_viewer_id}"
 
-                        id, entitlement = get_customfield_id(session_token, ticket_number)
+                            id, entitlement = get_customfield_id(session_token, ticket_number)
 
-                        update_data = {
-                                    'title':str(all_details.get('title')),
-                                    'contact': str(all_details.get('firstname')+" "+all_details.get('surname')),
-                                    'client':str(entities_map.get(all_details.get('entities_id'))),
-                                    'gid': str(all_details.get('gid')),
-                                    'visible': '',
-                                    'migacz':'',
-                                    'queue': entitlement
-                                }
+                            update_data = {
+                                        'title':str(all_details.get('title')),
+                                        'contact': str(all_details.get('firstname')+" "+all_details.get('surname')),
+                                        'client':str(entities_map.get(all_details.get('entities_id'))),
+                                        'gid': str(all_details.get('gid')),
+                                        'visible': '',
+                                        'migacz':'',
+                                        'queue': entitlement
+                                    }
 
-                        response = requests.put(updata_link, json=update_data) 
-                        #response.raise_for_status()
-                        if response.status_code == 200:
-                            add_or_update_ticket(ticket_number, 1, last_modified)
-                        else:
-                            remove_ticket(ticket_number, 0)
-                            perform_deletions()
-                                        
+                            response = requests.put(updata_link, json=update_data) 
+                            #response.raise_for_status()
+                            if response.status_code == 200:
+                                add_or_update_ticket(ticket_number, 1, last_modified)
+                            else:
+                                remove_ticket(ticket_number, 0)
+                                perform_deletions()
+                        except Exception as e:
+                            print(f"Error geting sending update: {e}")
+                        #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                
 
                         """
                         #Send outside new followups in observed tickets / off ?
@@ -468,4 +472,4 @@ def glpi_main(tik_aid_main, session_token):
     except Exception as e:
         print(f"Main GLPI Connector ERROR: {e}")
 
-    return all_details, False, 1
+    return data, False, 1
