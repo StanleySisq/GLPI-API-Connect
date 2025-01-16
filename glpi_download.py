@@ -317,7 +317,7 @@ def glpi_main(tik_aid_main, session_token):
                         except Exception as e:
                             print("Error getting user details: ")
                             break
-                        #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        
                         try:
                             all_details = merge_ticket_and_user_details(tick_details, user_details, ass_technician_id)
 
@@ -345,8 +345,7 @@ def glpi_main(tik_aid_main, session_token):
                                 perform_deletions()
                         except Exception as e:
                             print(f"Error geting sending update: {e}")
-                        #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                
-
+                                  
                         """
                         #Send outside new followups in observed tickets / off ?
                         try:
