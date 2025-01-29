@@ -139,7 +139,7 @@ def get_assigned_users_from_ticket(session_token, ticket_id):
                     requester = user.get('users_id')
                 
                 if str(user_type) == "2":
-                    if str(technician) in ["None", "8", "7", "2747", "2702", "2703", "2731", "2555", "2662", "3793"]:
+                    if str(user.get('users_id')) in ["8", "7", "2747", "2702", "2703", "2731", "2555", "2662", "3793"] or str(technician) == "None":
                         technician = user.get('users_id')   
 
             #print(technician)
