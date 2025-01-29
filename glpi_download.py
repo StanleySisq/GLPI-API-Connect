@@ -379,7 +379,7 @@ def glpi_main(tik_aid_main, session_token):
                         #Send info if ticked closed in GLPI  
                         try:
                             state, assigned_to = check_ticket_state_and_technic(session_token, ticket_number)
-                            if state == "Closed" or assigned_to == "Other" or ticket_details.get('is_deleted') == 1:
+                            if state == "Closed" or assigned_to == "Other" or tick_details.get('is_deleted') == 1:
                                 print(f"Ticket {ticket_number} is closed/in progres/Other user.")
                                 """
                                 ticket_details = get_ticket_details(session_token, ticket_number)
@@ -404,7 +404,7 @@ def glpi_main(tik_aid_main, session_token):
                                 if response.status_code == 200:
                                     is_it, state_num = is_ticket_open(session_token, ticket_number)
                                                                 
-                                    if state_num > 4 or ticket_details.get('is_deleted') == 1:
+                                    if state_num > 4 or tick_details.get('is_deleted') == 1:
                                         remove_ticket(ticket_number, 72)
                                 else:
                                     remove_ticket(ticket_number, 0)
