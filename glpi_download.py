@@ -138,8 +138,9 @@ def get_assigned_users_from_ticket(session_token, ticket_id):
                 if str(user_type) == "1" and requester == "None":
                     requester = user.get('users_id')
                 
-                if str(user_type) == "2" and technician == "None":
-                    technician = user.get('users_id')
+                if str(user_type) == "2":
+                    if str(technician) in ["None", "8", "7", "2747", "2702", "2703", "2731", "2555", "2662", "3793"]:
+                        technician = user.get('users_id')   
 
             #print(technician)
             #print(requester)
@@ -378,7 +379,7 @@ def glpi_main(tik_aid_main, session_token):
                         #Send info if ticked closed in GLPI  
                         try:
                             state, assigned_to = check_ticket_state_and_technic(session_token, ticket_number)
-                            if state == "Closed" or assigned_to == "Other":
+                            if state == "Closed" or assigned_to == "Other" or ticket_details.get('is_deleted') == 1:
                                 print(f"Ticket {ticket_number} is closed/in progres/Other user.")
                                 """
                                 ticket_details = get_ticket_details(session_token, ticket_number)
@@ -403,7 +404,7 @@ def glpi_main(tik_aid_main, session_token):
                                 if response.status_code == 200:
                                     is_it, state_num = is_ticket_open(session_token, ticket_number)
                                                                 
-                                    if state_num > 4:
+                                    if state_num > 4 or ticket_details.get('is_deleted') == 1:
                                         remove_ticket(ticket_number, 72)
                                 else:
                                     remove_ticket(ticket_number, 0)
