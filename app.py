@@ -299,12 +299,11 @@ def update_customs():
 
 @app.route('/upload_document', methods=['POST'])
 def upload_document():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part in the request'}), 400
+    data = request.json 
 
-    file = request.files['file']
-    file_name = request.form.get('file_name')
-    ticket_id = request.form.get('ticket_id')
+    file = data.get('file')
+    file_name = data.get('file_name')
+    ticket_id = data.get('ticket_id')
 
     #if not file_name or not ticket_id:
         #return jsonify({'error': 'file_name and ticket_id are required'}), 400
