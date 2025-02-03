@@ -365,6 +365,10 @@ def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_categ
 import base64
 import io
 
+import base64
+import io
+import requests
+
 def upload_document_to_ticket(session_token, ticket_id, name, file_storage):
     file_content = file_storage.read()
 
@@ -379,8 +383,8 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_storage):
     url = f"{settings.Glpi_Url}/Document"
 
     files = {
-        'uploadManifest': (None, '{"input": {"name": "' + name + '"}}'),
-        'filename': (name, content.read())
+        'uploadManifest': (None, '{"input": {"name": "' + name + '"}}'),  
+        'filename': (name, content.read())  
     }
 
     response = requests.post(url, headers=header(session_token), files=files)
