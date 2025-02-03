@@ -383,9 +383,10 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_storage):
     url = f"{settings.Glpi_Url}/Document"
 
     files = {
-        'uploadManifest': (None, '{"input": {"name": "' + name + '"}}'),  
-        'filename': (name, content.read())  
-    }
+        "input": {
+            "name": "' + name + '",
+            'filename': (name, content.read()) 
+    }}
 
     response = requests.post(url, headers=header(session_token), files=files)
 
