@@ -365,15 +365,19 @@ def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_categ
 
 import json
 import mimetypes
+import base64
 
-def save_document(file_name, file, folder_path='temp_files'):
+def save_document(file_name, file_b, folder_path='temp_files'):
+
+    binary_file = base64.b64decode(file_b)
 
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
 
     file_path = os.path.join(folder_path, file_name)
 
-    file.save(file_path)
+    with open(file_path, "wb") as file:
+        file.write(binary_file)
     
     return file_path
 
