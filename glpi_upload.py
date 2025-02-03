@@ -385,7 +385,11 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_content):
 
     filepath = save_document(name, file_content)
 
+    url = f"{settings.Glpi_Url}/Document"
+
     json_payload = json.dumps({"input": {"name": name, "_filename": [os.path.basename(filepath)]}})
+    print(f" Przesyłanie pliku: {filepath}")
+    print(f" JSON wysyłany w `uploadManifest`: {json_payload}")
 
     mime_type, _ = mimetypes.guess_type(filepath)
     if mime_type is None:
@@ -397,8 +401,7 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_content):
             'filename[0]': (os.path.basename(filepath), file, mime_type)
         }
 
-        upload_url = f"{settings.Glpi_Url}/Document"
-        response = requests.post(upload_url, headers=header(session_token), files=files)
+        response = requests.post(url, headers=header(session_token), files=files)
 
     if os.path.exists(filepath):
         os.remove(filepath)

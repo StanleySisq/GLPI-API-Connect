@@ -302,8 +302,9 @@ def upload_document():
     data = request.json 
 
     file = data.get('file')
-    file_name = data.get('file_name')
+    file_name = data.get('file_name', "plik")
     ticket_id = data.get('ticket_id')
+    print(file_name)
 
     try:
         document_id = upload_document_to_ticket(session_token, ticket_id, file_name, file)
