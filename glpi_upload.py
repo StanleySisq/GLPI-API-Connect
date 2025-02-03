@@ -1,3 +1,4 @@
+import os
 import requests
 from glpi_utiles import header
 from data import remove_ticket, perform_deletions
@@ -365,28 +366,38 @@ def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_categ
 import json
 import mimetypes
 
+def save_document(file_name, file, folder_path='temp_files'):
+
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
+    file_path = os.path.join(folder_path, file_name)
+
+    file.save(file_path)
+    
+    return file_path
+
 def upload_document_to_ticket(session_token, ticket_id, name, file_content):
 
-    #file_content = file_storage.read()
+    filepath = save_document(name, file_content)
 
     mime_type, _ = mimetypes.guess_type(name)
     if mime_type is None:
         mime_type = "application/octet-stream" 
 
-    upload_manifest = {
-        "input": {
-            "name": name,
-            "_filename": [name]
+    json_payload = json.dumps({"input": {"name": name, "_filename": [os.path.basename(filepath)]}})
+
+    with open(filepath, 'rb') as file:
+        files = {
+            'uploadManifest': (None, json_payload, 'application/json'),
+            'filename[0]': (os.path.basename(filepath), file, mime_type)
         }
-    }
 
-    files = {
-        'uploadManifest': (None, json.dumps(upload_manifest), 'application/json'),
-        'filename[0]': (name, file_content, mime_type)
-    }
+        upload_url = f"{settings.Glpi_Url}/Document/"
+        response = requests.post(upload_url, headers=header(session_token), files=files)
 
-    upload_url = f"{settings.Glpi_Url}/Document/"
-    response = requests.post(upload_url, headers=header(session_token), files=files)
+    if os.path.exists(filepath):
+        os.remove(filepath)
 
     if response.status_code == 201:
         document_id = response.json().get('id')
