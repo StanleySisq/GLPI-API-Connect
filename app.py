@@ -174,7 +174,7 @@ def add_ticket():
         return jsonify({"error": str(e)}), 500
     
 @app.route('/add_ticket_instant', methods=['POST'])
-def add_ticket():
+def add_ticket_instant():
     data = request.json
 
     tick_type = data.get('tick_type', "Incydent")
