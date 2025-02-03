@@ -396,8 +396,8 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_content):
         upload_url = f"{settings.Glpi_Url}/Document/"
         response = requests.post(upload_url, headers=header(session_token), files=files)
 
-    if os.path.exists(filepath):
-        os.remove(filepath)
+    #if os.path.exists(filepath):
+        #os.remove(filepath)
 
     if response.status_code == 201:
         document_id = response.json().get('id')
