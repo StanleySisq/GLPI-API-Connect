@@ -305,11 +305,7 @@ def upload_document():
     file_name = data.get('file_name')
     ticket_id = data.get('ticket_id')
 
-    #if not file_name or not ticket_id:
-        #return jsonify({'error': 'file_name and ticket_id are required'}), 400
-
     try:
-        # Upload file to GLPI
         document_id = upload_document_to_ticket(session_token, ticket_id, file_name, file)
 
         return jsonify({

@@ -3,6 +3,9 @@ import requests
 from glpi_utiles import header
 from data import remove_ticket, perform_deletions
 import settings
+import json
+import mimetypes
+import base64
 
 #ADD CHANGE OR STH IN GLPI
 
@@ -363,13 +366,7 @@ def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_categ
             print(f"Error updating custom fields with ID {custom_field_id} in {settings.Custom_Fields}: {response.status_code} - {response.text}")
             return None
 
-import json
-import mimetypes
-import base64
-
-def save_document(file_name, file_b, folder_path='temp_files'):
-
-    encoded_file = file_b#.read().decode('utf-8')
+def save_document(file_name,encoded_file, folder_path='temp_files'):
 
     binary_file = base64.b64decode(encoded_file)
 
@@ -387,11 +384,11 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_content):
 
     filepath = save_document(name, file_content)
 
+    json_payload = json.dumps({"input": {"name": name, "_filename": [os.path.basename(filepath)]}})
+
     mime_type, _ = mimetypes.guess_type(name)
     if mime_type is None:
         mime_type = "application/octet-stream" 
-
-    json_payload = json.dumps({"input": {"name": name, "_filename": [os.path.basename(filepath)]}})
 
     with open(filepath, 'rb') as file:
         files = {
@@ -399,17 +396,17 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_content):
             'filename[0]': (os.path.basename(filepath), file, mime_type)
         }
 
-        upload_url = f"{settings.Glpi_Url}/Document/"
+        upload_url = f"{settings.Glpi_Url}/Document"
         response = requests.post(upload_url, headers=header(session_token), files=files)
 
-    #if os.path.exists(filepath):
-        #os.remove(filepath)
+    if os.path.exists(filepath):
+        os.remove(filepath)
 
     if response.status_code == 201:
         document_id = response.json().get('id')
-        print(f"Plik przesłany pomyślnie! ID dokumentu: {document_id}")
+        print(f"Send succesfully! ID document: {document_id}")
     else:
-        raise Exception(f"Błąd podczas przesyłania pliku. Status: {response.status_code}, Odpowiedź: {response.text}")
+        raise Exception(f"Error while sending. Status: {response.status_code}, Respa: {response.text}")
 
     link_url = f"{settings.Glpi_Url}/Ticket/{ticket_id}/Document_Item"
     link_data = {
@@ -423,8 +420,8 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_content):
     response = requests.post(link_url, headers=header(session_token), json=link_data)
 
     if response.status_code == 201:
-        print(f"Dokument ID {document_id} został przypisany do zgłoszenia ID {ticket_id}.")
+        print(f"Document ID {document_id} assigned to ticket {ticket_id}.")
         return document_id
     else:
-        raise Exception(f"Błąd podczas przypisywania dokumentu do zgłoszenia. Status: {response.status_code}, Odpowiedź: {response.text}")
+        raise Exception(f"Error assigning to ticket. Status: {response.status_code}, Respa: {response.text}")
 
