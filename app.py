@@ -2,7 +2,7 @@ import json
 from flask import Flask, jsonify, request, make_response
 import requests, threading, time
 from glpi_download import glpi_main, check_ticket_state_and_technic
-from glpi_upload import glpi_add_solution, glpi_add_followup, glpi_add_task_to_ticket, glpi_create_ticket, glpi_close_ticket, glpi_write_custom_fields
+from glpi_upload import glpi_add_solution, glpi_add_followup, glpi_add_task_to_ticket, glpi_create_ticket, glpi_close_ticket, glpi_write_custom_fields,glpi_create_ticket_instant
 import settings
 from data import add_local_viewer_id_ticket, perform_deletions, remove_ticket
 
@@ -173,6 +173,26 @@ def add_ticket():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+@app.route('/add_ticket_instant', methods=['POST'])
+def add_ticket():
+    data = request.json
+
+    tick_type = data.get('tick_type', "Incydent")
+    title = data.get('title')
+    description = data.get('description')
+    assigned_user_id = str(data.get('assigned_user_gid'))
+    unit_id = data.get('unit_id')
+
+    if not title or not description or not assigned_user_id or not unit_id:
+        return jsonify({"error": "title, description, assigned user and unit_id are required"}), 400
+
+    try:
+        glpi_response = glpi_create_ticket_instant(session_token, title, description, assigned_user_id, unit_id,  tick_type)
+
+        return jsonify(glpi_response), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 @app.route('/check_state', methods=['POST'])
 def check_state():
     data = request.json
@@ -228,9 +248,9 @@ def add_exe():
 
     try:
         glpi_response = glpi_create_ticket(session_token, title, description, assigned_user_id, assigned_technic_id, unit_id, close_after, "Incydent")
-        respa = glpi_add_task_to_ticket(glpi_response.get("id"), "Rozwiązanie",timesum*60 ,session_token)
+        respa = glpi_add_task_to_ticket(glpi_response.get("id"), "Rozwiązanie problemu",timesum*60 ,session_token)
         respa = glpi_write_custom_fields(session_token, glpi_response.get("id"), 1, 1, 1 , 2)
-        respa = glpi_close_ticket(session_token, glpi_response.get("id"), "Rozwiązanie")
+        respa = glpi_close_ticket(session_token, glpi_response.get("id"), "Rozwiązanie problemu")
 
         return jsonify(glpi_response), 200
     except Exception as e:

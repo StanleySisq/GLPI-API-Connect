@@ -141,6 +141,48 @@ def glpi_create_ticket(session_token, title, description, assigned_user_gid, ass
     else:
         print(f"Error creating ticket: {response.status_code} - {response.text}")
 
+def glpi_create_ticket_instant(session_token, title, description, assigned_user_gid, unit_id, tick_type):
+    assigned_user_id = get_user_id_and_unit_by_gid(session_token, assigned_user_gid)
+
+    if tick_type == "Wniosek":
+        tick_type = 2
+    else:
+        tick_type = 1
+    
+    ticket_data = {
+        "input": {
+            "name": title,
+            "content": description,
+            "requesttypes_id": 1,  
+            "urgency": 3,  
+            "impact": 3,  
+            "priority": 3,  
+            "type": tick_type,  
+            "entities_id": unit_id,
+            "_users_id_requester": assigned_user_id
+        }
+    }
+
+    response = requests.post(f"{settings.Glpi_Url}/Ticket", headers=header(session_token), json=ticket_data)
+
+    if response.status_code == 201:
+        ticket_info = response.json()
+        ticket_id = ticket_info.get("id") 
+
+        if not assigned_user_id:
+            print(f"User with GID {assigned_user_gid} not found.")
+        else:
+            print(assigned_user_id)
+
+        try:
+            assign_response = glpi_assign_user_to_ticket(session_token, ticket_id, 3793, 2)
+
+            return response.json()
+        except Exception as e:
+            print( f"Ticket created but failed to assign technician and close: {str(e)}")
+    else:
+        print(f"Error creating ticket: {response.status_code} - {response.text}")
+
 def glpi_assign_user_to_ticket(session_token, ticket_id, user_id, type):
     data = {
         "input": {
