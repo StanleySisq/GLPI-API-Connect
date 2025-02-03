@@ -306,8 +306,8 @@ def upload_document():
     file_name = request.form.get('file_name')
     ticket_id = request.form.get('ticket_id')
 
-    if not file_name or not ticket_id:
-        return jsonify({'error': 'file_name and ticket_id are required'}), 400
+    #if not file_name or not ticket_id:
+        #return jsonify({'error': 'file_name and ticket_id are required'}), 400
 
     try:
         # Upload file to GLPI
