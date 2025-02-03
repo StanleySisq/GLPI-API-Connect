@@ -183,7 +183,7 @@ def add_ticket_instant():
     assigned_user_id = str(data.get('assigned_user_gid'))
     unit_id = data.get('unit_id')
 
-    if not title or not description or not assigned_user_id or not unit_id:
+    if not title or not description or not assigned_user_id:
         return jsonify({"error": "title, description, assigned user and unit_id are required"}), 400
 
     try:
