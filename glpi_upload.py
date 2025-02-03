@@ -362,50 +362,40 @@ def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_categ
             print(f"Error updating custom fields with ID {custom_field_id} in {settings.Custom_Fields}: {response.status_code} - {response.text}")
             return None
 
-import base64
-import io
 import json
+import mimetypes
 
 def upload_document_to_ticket(session_token, ticket_id, name, file_storage):
-    # Odczytaj zawartość pliku
+
     file_content = file_storage.read()
 
-    # Dekoduj Base64 na dane binarne
-    try:
-        binary_content = base64.b64decode(file_content)
-    except Exception as e:
-        raise ValueError(f"Failed to decode Base64 content: {str(e)}")
+    mime_type, _ = mimetypes.guess_type(name)
+    if mime_type is None:
+        mime_type = "application/octet-stream" 
 
-    # Utwórz strumień pliku
-    content = io.BytesIO(binary_content)
-    content.name = name  # Ustaw nazwę pliku
-
-    # URL do przesyłania dokumentu
-    url = f"{settings.Glpi_Url}/Document"
-
-    # Przygotuj dane w formacie JSON
     upload_manifest = {
         "input": {
-            "name": name
+            "name": name,
+            "_filename": [name]
         }
     }
+
     files = {
-        'uploadManifest': (None, json.dumps(upload_manifest)),  # JSON-encoded manifest
-        'filename': (name, content.read())  # Zawartość binarna pliku
+        'uploadManifest': (None, json.dumps(upload_manifest), 'application/json'),
+        'filename[0]': (name, file_content, mime_type)
     }
 
-    # Wysyłanie pliku do GLPI
-    response = requests.post(url, headers=header(session_token), files=files)
+    upload_url = f"{settings.Glpi_Url}Document/"
+    response = requests.post(upload_url, headers=header(session_token), files=files)
 
-    # Obsługa odpowiedzi
     if response.status_code == 201:
         document_id = response.json().get('id')
+        print(f"Plik przesłany pomyślnie! ID dokumentu: {document_id}")
     else:
-        raise Exception(f"Error uploading file: {response.status_code} - {response.text}")
+        raise Exception(f"Błąd podczas przesyłania pliku. Status: {response.status_code}, Odpowiedź: {response.text}")
 
-    # Powiązanie dokumentu z biletem
-    url = f"{settings.Glpi_Url}/Ticket/{ticket_id}/Document_Item"
-    data = {
+    link_url = f"{settings.Glpi_Url}Ticket/{ticket_id}/Document_Item"
+    link_data = {
         "input": {
             "items_id": ticket_id,
             "itemtype": "Ticket",
@@ -413,12 +403,11 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_storage):
         }
     }
 
-    # Wysyłanie żądania POST do powiązania dokumentu
-    response = requests.post(url, headers=header(session_token), json=data)
+    response = requests.post(link_url, headers=header(session_token), json=link_data)
 
-    # Obsługa odpowiedzi
     if response.status_code == 201:
+        print(f"Dokument ID {document_id} został przypisany do zgłoszenia ID {ticket_id}.")
         return document_id
     else:
-        raise Exception(f"Error linking document to ticket: {response.status_code} - {response.text}")
+        raise Exception(f"Błąd podczas przypisywania dokumentu do zgłoszenia. Status: {response.status_code}, Odpowiedź: {response.text}")
 
