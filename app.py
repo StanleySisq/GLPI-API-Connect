@@ -319,6 +319,7 @@ def upload_document():
             'ticket_id': ticket_id
         }), 200
     except Exception as e:
+        print(f"Error: {e}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
