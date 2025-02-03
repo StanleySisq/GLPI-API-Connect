@@ -369,7 +369,9 @@ import base64
 
 def save_document(file_name, file_b, folder_path='temp_files'):
 
-    binary_file = base64.b64decode(file_b)
+    encoded_file = file_b.read().decode('utf-8')
+
+    binary_file = base64.b64decode(encoded_file)
 
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
