@@ -364,39 +364,47 @@ def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_categ
 
 import base64
 import io
-
-import base64
-import io
-import requests
+import json
 
 def upload_document_to_ticket(session_token, ticket_id, name, file_storage):
+    # Odczytaj zawartość pliku
     file_content = file_storage.read()
 
+    # Dekoduj Base64 na dane binarne
     try:
         binary_content = base64.b64decode(file_content)
     except Exception as e:
         raise ValueError(f"Failed to decode Base64 content: {str(e)}")
 
+    # Utwórz strumień pliku
     content = io.BytesIO(binary_content)
-    content.name = name  
+    content.name = name  # Ustaw nazwę pliku
 
+    # URL do przesyłania dokumentu
     url = f"{settings.Glpi_Url}/Document"
 
-    files = {
+    # Przygotuj dane w formacie JSON
+    upload_manifest = {
         "input": {
-            "name": "' + name + '",
-            'filename': (name, content.read()) 
-    }}
+            "name": name
+        }
+    }
+    files = {
+        'uploadManifest': (None, json.dumps(upload_manifest)),  # JSON-encoded manifest
+        'filename': (name, content.read())  # Zawartość binarna pliku
+    }
 
+    # Wysyłanie pliku do GLPI
     response = requests.post(url, headers=header(session_token), files=files)
 
+    # Obsługa odpowiedzi
     if response.status_code == 201:
         document_id = response.json().get('id')
     else:
         raise Exception(f"Error uploading file: {response.status_code} - {response.text}")
 
+    # Powiązanie dokumentu z biletem
     url = f"{settings.Glpi_Url}/Ticket/{ticket_id}/Document_Item"
-
     data = {
         "input": {
             "items_id": ticket_id,
@@ -405,8 +413,10 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_storage):
         }
     }
 
+    # Wysyłanie żądania POST do powiązania dokumentu
     response = requests.post(url, headers=header(session_token), json=data)
 
+    # Obsługa odpowiedzi
     if response.status_code == 201:
         return document_id
     else:
