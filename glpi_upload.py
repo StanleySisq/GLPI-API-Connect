@@ -364,13 +364,17 @@ def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_categ
 
 import base64
 import io
-import requests
 
-def upload_document_to_ticket(session_token, ticket_id, name, base64_content):
-    binary_content = base64.b64decode(base64_content)
+def upload_document_to_ticket(session_token, ticket_id, name, file_storage):
+    file_content = file_storage.read()
+
+    try:
+        binary_content = base64.b64decode(file_content)
+    except Exception as e:
+        raise ValueError(f"Failed to decode Base64 content: {str(e)}")
 
     content = io.BytesIO(binary_content)
-    content.name = name 
+    content.name = name  
 
     url = f"{settings.Glpi_Url}/Document"
 
@@ -378,6 +382,7 @@ def upload_document_to_ticket(session_token, ticket_id, name, base64_content):
         'uploadManifest': (None, '{"input": {"name": "' + name + '"}}'),
         'filename': (name, content.read())
     }
+
     response = requests.post(url, headers=header(session_token), files=files)
 
     if response.status_code == 201:
@@ -401,3 +406,4 @@ def upload_document_to_ticket(session_token, ticket_id, name, base64_content):
         return document_id
     else:
         raise Exception(f"Error linking document to ticket: {response.status_code} - {response.text}")
+
