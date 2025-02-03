@@ -385,7 +385,7 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_storage):
         'filename[0]': (name, file_content, mime_type)
     }
 
-    upload_url = f"{settings.Glpi_Url}Document/"
+    upload_url = f"{settings.Glpi_Url}/Document/"
     response = requests.post(upload_url, headers=header(session_token), files=files)
 
     if response.status_code == 201:
@@ -394,7 +394,7 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_storage):
     else:
         raise Exception(f"Błąd podczas przesyłania pliku. Status: {response.status_code}, Odpowiedź: {response.text}")
 
-    link_url = f"{settings.Glpi_Url}Ticket/{ticket_id}/Document_Item"
+    link_url = f"{settings.Glpi_Url}/Ticket/{ticket_id}/Document_Item"
     link_data = {
         "input": {
             "items_id": ticket_id,
