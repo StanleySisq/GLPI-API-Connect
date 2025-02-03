@@ -2,7 +2,7 @@ import json
 from flask import Flask, jsonify, request, make_response
 import requests, threading, time
 from glpi_download import glpi_main, check_ticket_state_and_technic
-from glpi_upload import glpi_add_solution, glpi_add_followup, glpi_add_task_to_ticket, glpi_create_ticket, glpi_close_ticket, glpi_write_custom_fields,glpi_create_ticket_instant
+from glpi_upload import glpi_add_solution, glpi_add_followup, glpi_add_task_to_ticket, glpi_create_ticket, glpi_close_ticket, glpi_write_custom_fields,glpi_create_ticket_instant, upload_document_to_ticket
 import settings
 from data import add_local_viewer_id_ticket, perform_deletions, remove_ticket
 
@@ -296,6 +296,30 @@ def update_customs():
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/upload_document', methods=['POST'])
+def upload_document():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part in the request'}), 400
+
+    file = request.files['file']
+    file_name = request.form.get('file_name')
+    ticket_id = request.form.get('ticket_id')
+
+    if not file_name or not ticket_id:
+        return jsonify({'error': 'file_name and ticket_id are required'}), 400
+
+    try:
+        # Upload file to GLPI
+        document_id = upload_document_to_ticket(session_token, ticket_id, file_name, file)
+
+        return jsonify({
+            'message': 'File uploaded and linked to ticket successfully.',
+            'document_id': document_id,
+            'ticket_id': ticket_id
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     session_fresher = threading.Thread(target=refresh_sesion)

@@ -361,3 +361,37 @@ def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_categ
         else:
             print(f"Error updating custom fields with ID {custom_field_id} in {settings.Custom_Fields}: {response.status_code} - {response.text}")
             return None
+
+def upload_document_to_ticket(session_token, ticket_id, name, content):
+
+    url = f"{settings.Glpi_Url}/Document"
+
+    files = {
+        'uploadManifest': (None, '{"input": {"name": "' + name + '"}}'),
+        'filename': (name, content.read())
+    }
+
+    response = requests.post(url, headers=header(session_token), files=files)
+
+    if response.status_code == 201:
+        document_id = response.json().get('id')
+        
+    else:
+        raise Exception(f"Error uploading file: {response.status_code} - {response.text}")
+    
+    url = f"{settings.Glpi_Url}/Ticket/{ticket_id}/Document_Item"
+
+    data = {
+        "input": {
+            "items_id": ticket_id,
+            "itemtype": "Ticket",
+            "documents_id": document_id
+        }
+    }
+
+    response = requests.post(url, headers=header(session_token), json=data)
+
+    if response.status_code == 201:
+        return document_id
+    else:
+        raise Exception(f"Error linking document to ticket: {response.status_code} - {response.text}")
