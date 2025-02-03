@@ -365,9 +365,9 @@ def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_categ
 import json
 import mimetypes
 
-def upload_document_to_ticket(session_token, ticket_id, name, file_storage):
+def upload_document_to_ticket(session_token, ticket_id, name, file_content):
 
-    file_content = file_storage.read()
+    #file_content = file_storage.read()
 
     mime_type, _ = mimetypes.guess_type(name)
     if mime_type is None:
