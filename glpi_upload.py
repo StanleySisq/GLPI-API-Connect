@@ -366,9 +366,10 @@ def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_categ
             print(f"Error updating custom fields with ID {custom_field_id} in {settings.Custom_Fields}: {response.status_code} - {response.text}")
             return None
 
-def save_document(file_name,encoded_file, folder_path='temp_files'):
+def save_document(file_name,encoded_file):
 
     binary_file = base64.b64decode(encoded_file)
+    folder_path='temp_files'
 
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
@@ -386,7 +387,7 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_content):
 
     json_payload = json.dumps({"input": {"name": name, "_filename": [os.path.basename(filepath)]}})
 
-    mime_type, _ = mimetypes.guess_type(name)
+    mime_type, _ = mimetypes.guess_type(filepath)
     if mime_type is None:
         mime_type = "application/octet-stream" 
 
