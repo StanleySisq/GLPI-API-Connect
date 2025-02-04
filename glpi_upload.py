@@ -6,7 +6,6 @@ import settings
 import json
 import mimetypes
 import base64
-import filemm
 
 #ADD CHANGE OR STH IN GLPI
 
@@ -414,6 +413,8 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_content):
         print(f"Send succesfully! ID document: {document_id}")
     else:
         raise Exception(f"Error while sending. Status: {response.status_code}, Respa: {response.text}")
+    
+    return document_id
 
     link_url = f"{settings.Glpi_Url}/Ticket/{ticket_id}/Document_Item"
     link_data = {
