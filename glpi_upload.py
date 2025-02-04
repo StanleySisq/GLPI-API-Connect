@@ -6,6 +6,7 @@ import settings
 import json
 import mimetypes
 import base64
+import file
 
 #ADD CHANGE OR STH IN GLPI
 
@@ -382,7 +383,8 @@ def save_document(file_name,encoded_file):
     
     return file_path
 
-def upload_document_to_ticket(session_token, ticket_id, name, file_content):
+def upload_document_to_ticket(session_token, ticket_id, name, file_c):
+    file_content = file.filer
 
     filepath = save_document(name, file_content)
 
