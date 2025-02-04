@@ -383,15 +383,14 @@ def save_document(file_name,encoded_file):
     
     return file_path
 
-def upload_document_to_ticket(session_token, ticket_id, name, file_c):
-    file_content = filemm.filer
+def upload_document_to_ticket(session_token, ticket_id, name, file_content):
 
     filepath = save_document(name, file_content)
 
-    url = f"{settings.Glpi_Url}/Document/"
+    url = f"{settings.Glpi_Url}/Document"
     print(url)
 
-    json_payload = json.dumps({"input": {"name": name, "_filename": [os.path.basename(filepath)]}},ensure_ascii=False)
+    json_payload = json.dumps({"input": {"name": name, "_filename": [os.path.basename(filepath)]}})
     print(f" Przesyłanie pliku: {filepath}")
     print(f" JSON wysyłany w `uploadManifest`: {json_payload}")
 
@@ -407,8 +406,8 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_c):
 
         response = requests.post(url, headers=header(session_token), files=files)
 
-    #if os.path.exists(filepath):
-        #os.remove(filepath)
+    if os.path.exists(filepath):
+        os.remove(filepath)
 
     if response.status_code == 201:
         document_id = response.json().get('id')

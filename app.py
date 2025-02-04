@@ -301,13 +301,13 @@ def update_customs():
 def upload_document():
     data = request.json 
 
-    file = str(data.get('file'))
+    content = str(data.get('file'))
     file_name = str(data.get('file_name', "plik"))
     ticket_id = data.get('ticket_id')
     print(file_name)
 
     try:
-        document_id = upload_document_to_ticket(session_token, ticket_id, file_name, file)
+        document_id = upload_document_to_ticket(session_token, ticket_id, file_name, content)
 
         return jsonify({
             'message': 'File uploaded and linked to ticket successfully.',
