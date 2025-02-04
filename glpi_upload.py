@@ -375,6 +375,7 @@ def save_document(file_name,encoded_file):
         os.makedirs(folder_path)
 
     file_path = os.path.join(folder_path, file_name)
+    print(file_path)
 
     with open(file_path, "wb") as file:
         file.write(binary_file)
@@ -386,6 +387,7 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_content):
     filepath = save_document(name, file_content)
 
     url = f"{settings.Glpi_Url}/Document/"
+    print(url)
 
     json_payload = json.dumps({"input": {"name": name, "_filename": [os.path.basename(filepath)]}})
     print(f" Przesyłanie pliku: {filepath}")
