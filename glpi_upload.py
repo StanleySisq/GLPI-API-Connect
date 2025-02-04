@@ -389,7 +389,7 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_content):
     url = f"{settings.Glpi_Url}/Document/"
     print(url)
 
-    json_payload = json.dumps({"input": {"name": name, "_filename": [os.path.basename(filepath)]}})
+    json_payload = json.dumps({"input": {"name": name, "_filename": [os.path.basename(filepath)]}},ensure_ascii=False)
     print(f" Przesyłanie pliku: {filepath}")
     print(f" JSON wysyłany w `uploadManifest`: {json_payload}")
 
