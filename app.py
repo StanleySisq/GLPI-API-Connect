@@ -301,8 +301,8 @@ def update_customs():
 def upload_document():
     data = request.json 
 
-    file = data.get('file')
-    file_name = data.get('file_name', "plik")
+    file = str(data.get('file'))
+    file_name = str(data.get('file_name', "plik"))
     ticket_id = data.get('ticket_id')
     print(file_name)
 

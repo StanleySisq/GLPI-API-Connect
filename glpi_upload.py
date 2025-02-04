@@ -385,7 +385,7 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_content):
 
     filepath = save_document(name, file_content)
 
-    url = f"{settings.Glpi_Url}/Document"
+    url = f"{settings.Glpi_Url}/Document/"
 
     json_payload = json.dumps({"input": {"name": name, "_filename": [os.path.basename(filepath)]}})
     print(f" Przesyłanie pliku: {filepath}")
@@ -403,8 +403,8 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_content):
 
         response = requests.post(url, headers=header(session_token), files=files)
 
-    if os.path.exists(filepath):
-        os.remove(filepath)
+    #if os.path.exists(filepath):
+        #os.remove(filepath)
 
     if response.status_code == 201:
         document_id = response.json().get('id')
