@@ -399,7 +399,7 @@ def upload_document_to_ticket(session_token, ticket_id, name, file_content):
 
     with open(filepath, 'rb') as file:
         files = {
-            'uploadManifest': (None, json_payload, 'application/json'),
+            'uploadManifest': ("", json_payload, 'application/json'),
             'filename[0]': (os.path.basename(filepath), file, mime_type)
         }
 
