@@ -319,7 +319,7 @@ def get_customfield_id(session_token, ticket_id):
 
     return id, entitlement
     
-def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_category=0, additional=0, team=1):
+def glpi_write_custom_fields(session_token, ticket_id, entitlement=1, cost_category=1, additional=1, team=1):
 
     endpoint = f"{settings.Glpi_Url}/{settings.Custom_Fields}"
 
@@ -345,13 +345,13 @@ def glpi_write_custom_fields(session_token, ticket_id, entitlement=0, cost_categ
         endpoint = f"{settings.Glpi_Url}/{settings.Custom_Fields}/{custom_field_id}"
 
         custom_fields = {}
-        if entitlement is not 'None':
+        if entitlement is not None:
             custom_fields["plugin_fields_uprawnieniefielddropdowns_id"] = entitlement
-        if cost_category is not 'None':
+        if cost_category is not None:
             custom_fields["plugin_fields_kategoriawydatkufielddropdowns_id"] = cost_category
-        if additional is not 'None':
+        if additional is not None:
             custom_fields["czydodatkowefield"] = additional
-        if team is not 'None':
+        if team is not None:
             custom_fields["plugin_fields_teamfielddropdowns_id"] = team
 
         data = {
