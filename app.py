@@ -102,7 +102,7 @@ def remove_trash():
         records = load_tickets()
         for record in records:
             id, last_date = record
-            max_time = datetime.now() - timedelta(days=75)
+            max_time = datetime.now() - timedelta(days=30)
             if max_time > last_date:
                 remove_ticket(id, 0)
             
