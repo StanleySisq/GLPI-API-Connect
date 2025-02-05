@@ -295,13 +295,13 @@ def update_customs():
     elif additional =="Nie": 
         additional = 0
     if team =="Blue":
-        team == 1
+        team = 1
     elif team =="Red":
-        team == 2
+        team = 2
     elif team =="Grey":
-        team == 3
+        team = 3
     elif team =="Hide":
-        team == 4
+        team = 4
 
     try:
         response = glpi_write_custom_fields(session_token, ticket_id, entitlement, cost_category, additional , team)
