@@ -4,7 +4,8 @@ import requests, threading, time
 from glpi_download import glpi_main, check_ticket_state_and_technic
 from glpi_upload import glpi_add_solution, glpi_add_followup, glpi_add_task_to_ticket, glpi_create_ticket, glpi_close_ticket, glpi_write_custom_fields,glpi_create_ticket_instant, upload_document_to_ticket
 import settings
-from data import add_local_viewer_id_ticket, perform_deletions, remove_ticket
+from data import add_local_viewer_id_ticket, perform_deletions, remove_ticket, load_tickets
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
@@ -33,6 +34,7 @@ def refresh_sesion():
     while True:
         try:
             session_token = init_session()
+            remove_trash()
             perform_deletions()
         except:
             print("Error sesion refresh")
@@ -93,8 +95,20 @@ def continuous_download():
             print(f"Error while downloading or sending the ticket (app): {download_result} || ")
             print(f"Error: {str(e)}")
        
-        time.sleep(5) 
+        time.sleep(5)
 
+def remove_trash():
+    try:
+        records = load_tickets()
+        for record in records:
+            id, last_date = record
+            max_time = datetime.now() - timedelta(days=75)
+            if max_time > last_date:
+                remove_ticket(id, 0)
+            
+    except Exception as e:
+        print(f"Error removing trash: {e}")
+    
 @app.route('/trigger', methods=['POST'])
 def trigger_event():
     return jsonify({"message": "Continuous download is running"}), 200
@@ -261,10 +275,10 @@ def update_customs():
     data = request.json  
 
     ticket_id = data.get('ticket_id')
-    entitlement =  data.get('entitlement', 0)
-    cost_category = data.get('cost_category', 0)
-    additional = data.get('additional', 0)
-    team = data.get('team')
+    entitlement =  data.get('entitlement', 1)
+    cost_category = data.get('cost_category', 1)
+    additional = data.get('additional', 1)
+    team = data.get('team', 1)
     if not ticket_id:
         return jsonify({"error": "ticket_id, entitlement,cost category and if additional are required"}), 400
     
@@ -295,7 +309,7 @@ def update_customs():
         return jsonify(response), 200
     
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"Update customs error": str(e)}), 500
 
 @app.route('/upload_document', methods=['POST'])
 def upload_document():
