@@ -124,13 +124,13 @@ def get_assigned_users_from_ticket(session_token, ticket_id):
     url = f"{settings.Glpi_Url}/Ticket/{ticket_id}/Ticket_User"
 
     response = requests.get(url, headers=header(session_token))
+    requester = "None"
+    technician = "None"
 
-    if response.status_code == 200:
+    if response.status_code == 200 or response.status_code == 206:
         result = response.json() 
 
         if result:
-            requester = "None"
-            technician = "None"
 
             for user in result:
                 user_type = user.get('type')  
@@ -141,13 +141,29 @@ def get_assigned_users_from_ticket(session_token, ticket_id):
                 if str(user_type) == "2":
                     if str(user.get('users_id')) in ["8", "7", "2747", "2702", "2703", "2731", "2555", "2662", "3793"] or str(technician) == "None":
                         technician = user.get('users_id')   
-
+        
             #print(technician)
             #print(requester)
-            return requester, technician
-        else:
-            print(f"No users found for ticket ID {ticket_id}.")
-            return "None", "None"
+        if technician == "None":
+            url = f"{settings.Glpi_Url}/Ticket/{ticket_id}/Group_Ticket"
+            response = requests.get(url, headers=header(session_token))
+
+            if response.status_code == 200 or response.status_code == 206:
+                result = response.json() 
+
+                if result:
+
+                    for group in result:
+                        group_type = group.get('type')  
+                                
+                        if str(group_type) == "2":
+                            if str(group.get('groups_id')) in ["4", "6"]:
+                                technician = 3793
+                            if str(technician) == "None":
+                                technician = 1
+
+        return requester, technician
+
     else:
         print(f"Error fetching assigned users: {response.status_code} - {response.text}")
         return "None", "None"
