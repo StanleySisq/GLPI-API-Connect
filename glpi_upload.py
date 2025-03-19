@@ -57,7 +57,8 @@ def glpi_add_task_to_ticket(ticket_id, task_content, duration, session_token):
             "users_id": 3793,
             "taskcategories_id": 1,
             "state": 2,  #  (2 = Donee)
-            "actiontime": duration  # in secondes
+            "actiontime": duration,  # in secondes
+            "is_private": 1
         }
     }
 

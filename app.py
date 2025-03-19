@@ -100,9 +100,12 @@ def continuous_download():
 def remove_trash():
     try:
         records = load_tickets()
+        date_format = "%Y-%m-%d %H:%M:%S"
         for record in records:
             id, last_date = record
-            max_time = datetime.now() - timedelta(days=30)
+            max_time = datetime.now() - timedelta(days=60)
+            max_time =  datetime.strptime(max_time, date_format)
+            last_date =  datetime.strptime(last_date, date_format)
             if max_time > last_date:
                 remove_ticket(id, 0)
             
